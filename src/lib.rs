@@ -1,3 +1,7 @@
+extern crate xml;
+
+pub mod ofx;
+
 #[cfg(test)]
 mod tests {
     #[test]
