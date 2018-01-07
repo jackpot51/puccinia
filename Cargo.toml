@@ -4,10 +4,15 @@ version = "0.1.0"
 authors = ["Jeremy Soller <jackpot51@gmail.com>"]
 
 [dependencies]
-"hyper-rustls" = "0.6"
-"mime" = "0.2"
-"xml-rs" = "0.7"
+chrono = "0.4"
+hyper-rustls = "0.6"
+mime = "0.2"
+rand = "0.4"
 
 [dependencies.hyper]
 version = "0.10"
 default-features = false
+
+[dependencies.xml-rs]
+version = "0.7"
+path = "xml-rs"

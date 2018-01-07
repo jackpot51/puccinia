@@ -1,4 +1,4 @@
-
+/examples/secret.rs
 /target/
 **/*.rs.bk
 Cargo.lock
