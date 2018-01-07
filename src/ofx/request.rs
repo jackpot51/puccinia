@@ -35,7 +35,7 @@ pub struct Request<'a, Tz: TimeZone + 'a> {
     pub url: &'a str,
     pub ofx_ver: &'a str,
 
-    pub user: &'a str,
+    pub username: &'a str,
     pub password: &'a str,
     pub language: &'a str,
     pub fid: &'a str,
@@ -44,6 +44,7 @@ pub struct Request<'a, Tz: TimeZone + 'a> {
     pub app_ver: &'a str,
     pub client_id: &'a str,
 
+    pub broker_id: &'a str,
     pub bank_id: &'a str,
     pub account_id: &'a str,
     pub account_type: &'a str,
@@ -79,7 +80,7 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
                 w.write(XmlEvent::characters(&date_string(&Local::today())))?;
 
                 w.write(XmlEvent::start_element("USERID"))?;
-                w.write(XmlEvent::characters(self.user))?;
+                w.write(XmlEvent::characters(self.username))?;
 
                 w.write(XmlEvent::start_element("USERPASS"))?;
                 w.write(XmlEvent::characters(self.password))?;
@@ -133,7 +134,94 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
                 .create_writer(&mut data);
 
             match self.account_type {
+                "" => {
+                    w.write(XmlEvent::start_element("OFX"))?;
+                    {
+                        self.write_signon(&mut w)?;
+
+                        w.write(XmlEvent::start_element("SIGNUPMSGSRQV1"))?;
+                        {
+                            w.write(XmlEvent::start_element("ACCTINFOTRNRQ"))?;
+                            {
+                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                w.write(XmlEvent::characters(&random_string(32)))?;
+
+                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
+                                w.write(XmlEvent::characters(&random_string(5)))?;
+
+                                w.write(XmlEvent::start_element("ACCTINFORQ"))?;
+                                {
+                                    w.write(XmlEvent::start_element("DTACCTUP"))?;
+                                    w.write(XmlEvent::characters("19700101"))?;
+                                }
+                                w.write(XmlEvent::end_element().name("ACCTINFORQ"))?;
+                            }
+                            w.write(XmlEvent::end_element().name("ACCTINFOTRNRQ"))?;
+                        }
+                        w.write(XmlEvent::end_element().name("SIGNUPMSGSRQV1"))?;
+                    }
+                    w.write(XmlEvent::end_element().name("OFX"))?;
+                },
                 "INVESTMENT" => {
+                    w.write(XmlEvent::start_element("OFX"))?;
+                    {
+                        self.write_signon(&mut w)?;
+
+                        w.write(XmlEvent::start_element("INVSTMTMSGSRQV1"))?;
+                        {
+                            w.write(XmlEvent::start_element("INVSTMTTRNRQ"))?;
+                            {
+                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                w.write(XmlEvent::characters(&random_string(32)))?;
+
+                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
+                                w.write(XmlEvent::characters(&random_string(5)))?;
+
+                                w.write(XmlEvent::start_element("INVSTMTRQ"))?;
+                                {
+                                    w.write(XmlEvent::start_element("INVACCTFROM"))?;
+                                    {
+                                        w.write(XmlEvent::start_element("BROKERID"))?;
+                                        w.write(XmlEvent::characters(self.broker_id))?;
+
+                                        w.write(XmlEvent::start_element("ACCTID"))?;
+                                        w.write(XmlEvent::characters(self.account_id))?;
+                                    }
+                                    w.write(XmlEvent::end_element().name("INVACCTFROM"))?;
+
+                                    w.write(XmlEvent::start_element("INCTRAN"))?;
+                                    {
+                                        w.write(XmlEvent::start_element("DTSTART"))?;
+                                        w.write(XmlEvent::characters(&date_string(&self.start)))?;
+
+                                        w.write(XmlEvent::start_element("DTEND"))?;
+                                        w.write(XmlEvent::characters(&date_string(&self.end)))?;
+
+                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        w.write(XmlEvent::characters("Y"))?;
+                                    }
+                                    w.write(XmlEvent::end_element().name("INCTRAN"))?;
+
+                                    w.write(XmlEvent::start_element("INCOO"))?;
+                                    w.write(XmlEvent::characters("Y"))?;
+
+                                    w.write(XmlEvent::start_element("INCPOS"))?;
+                                    {
+                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        w.write(XmlEvent::characters("Y"))?;
+                                    }
+                                    w.write(XmlEvent::end_element().name("INCPOS"))?;
+
+                                    w.write(XmlEvent::start_element("INCBAL"))?;
+                                    w.write(XmlEvent::characters("Y"))?;
+                                }
+                                w.write(XmlEvent::end_element().name("INVSTMTRQ"))?;
+                            }
+                            w.write(XmlEvent::end_element().name("INVSTMTTRNRQ"))?;
+                        }
+                        w.write(XmlEvent::end_element().name("INVSTMTMSGSRQV1"))?;
+                    }
+                    w.write(XmlEvent::end_element().name("OFX"))?;
                 },
                 "CREDITCARD" => {
                 },

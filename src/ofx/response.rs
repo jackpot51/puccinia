@@ -43,7 +43,7 @@ pub struct Response {
     pub time: Option<String>,
     pub language: Option<String>,
     pub currency: Option<String>,
-    pub account: Option<Account>,
+    pub accounts: Vec<Account>,
     pub balance: Option<Balance>,
     pub start: Option<String>,
     pub end: Option<String>,
@@ -110,23 +110,28 @@ impl Response {
                                     response.time = stack_data.remove("DTSERVER");
                                     response.language = stack_data.remove("LANGUAGE");
                                 },
+
                                 "OFX/SIGNONMSGSRSV1/SONRS/FI" => {
                                     println!("Financial Institution");
                                     response.fid = stack_data.remove("FID");
                                     response.fid_org = stack_data.remove("ORG");
                                 },
+
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS" => {
                                     println!("Statement");
                                     response.currency = stack_data.remove("CURDEF");
                                 },
+
+                                "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO/BANKACCTINFO/BANKACCTFROM" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKACCTFROM" => {
                                     println!("Account");
-                                    response.account = Some(Account {
+                                    response.accounts.push(Account {
                                         id: stack_data.remove("ACCTID"),
                                         kind: stack_data.remove("ACCTTYPE"),
                                         bank_id: stack_data.remove("BANKID"),
                                     });
                                 },
+
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/LEDGERBAL" => {
                                     println!("Balance");
                                     response.balance = Some(Balance {
@@ -134,11 +139,13 @@ impl Response {
                                         time: stack_data.remove("DTASOF"),
                                     });
                                 },
+
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST" => {
                                     println!("Transaction list");
                                     response.start = stack_data.remove("DTSTART");
                                     response.end = stack_data.remove("DTEND");
                                 },
+
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST/STMTTRN" => {
                                     println!("Transaction");
                                     response.transactions.push(Transaction {
@@ -150,6 +157,7 @@ impl Response {
                                         kind: stack_data.remove("TRNTYPE"),
                                     });
                                 },
+
                                 _ => {
                                     println!("Unknown");
                                 }

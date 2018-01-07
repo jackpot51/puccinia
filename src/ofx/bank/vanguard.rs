@@ -1,29 +1,41 @@
-use chrono::{Date, TimeZone};
-use ofx::{ofx, Request, Response};
-use std::fmt::Display;
+use ofx::bank::Bank;
 
-pub fn vanguard<'a, Tz: TimeZone>(
-    user: &'a str, password: &'a str,
-    account_id: &'a str,
-    start: &'a Date<Tz>, end: &'a Date<Tz>
-) -> Result<Response, String> where Tz::Offset: Display {
-    ofx(Request {
-        url: "https://vesnc.vanguard.com/us/OfxDirectConnectServlet",
-        ofx_ver: "103",
+pub struct Vanguard<'a> {
+    username: &'a str,
+    password: &'a str,
+}
 
-        user: user,
-        password: password,
-        language: "ENG",
-        fid: "1358",
-        fid_org: "Vanguard",
-        app_id: "QBKS",
-        app_ver: "1900",
-        client_id: "",
+impl<'a> Vanguard<'a> {
+    pub fn new(username: &'a str, password: &'a str) -> Vanguard<'a> {
+        Vanguard {
+            username: username,
+            password: password,
+        }
+    }
+}
 
-        bank_id: "vanguard.com",
-        account_id: account_id,
-        account_type: "INVSTMT",
-        start: start,
-        end: end
-    })
+impl<'a> Bank for Vanguard<'a> {
+    fn url(&self) -> &str {
+        "https://vesnc.vanguard.com/us/OfxDirectConnectServlet"
+    }
+
+    fn username(&self) -> &str {
+        self.username
+    }
+
+    fn password(&self) -> &str {
+        self.password
+    }
+
+    fn fid(&self) -> &str {
+        "1358"
+    }
+
+    fn fid_org(&self) -> &str {
+        "Vanguard"
+    }
+
+    fn broker_id(&self) -> &str {
+        "vanguard.com"
+    }
 }

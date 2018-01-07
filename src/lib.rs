@@ -1,6 +1,6 @@
 extern crate chrono;
 extern crate hyper;
-extern crate hyper_rustls;
+extern crate hyper_native_tls;
 extern crate mime;
 extern crate rand;
 extern crate xml;
