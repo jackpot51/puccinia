@@ -1,4 +1,4 @@
-use ofx::bank::Bank;
+use ofx::Ofx;
 
 pub struct Amex<'a> {
     username: &'a str,
@@ -14,7 +14,7 @@ impl<'a> Amex<'a> {
     }
 }
 
-impl<'a> Bank for Amex<'a> {
+impl<'a> Ofx for Amex<'a> {
     fn url(&self) -> &str {
         "https://online.americanexpress.com/myca/ofxdl/desktop/desktopDownload.do?request_type=nl_ofxdownload"
     }

@@ -41,12 +41,14 @@ pub struct Position {
 
 #[derive(Debug, Default)]
 pub struct Transaction {
-    pub check_num: Option<String>,
-    pub time: Option<String>,
     pub id: Option<String>,
+    pub time: Option<String>,
     pub name: Option<String>,
+    pub memo: Option<String>,
     pub amount: Option<String>,
     pub kind: Option<String>,
+    pub check_num: Option<String>,
+    pub ref_num: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -189,12 +191,14 @@ impl Response {
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST/STMTTRN" => {
                                     println!("Transaction");
                                     response.transactions.push(Transaction {
-                                        check_num: stack_data.remove("CHECKNUM"),
-                                        time: stack_data.remove("DTPOSTED"),
                                         id: stack_data.remove("FITID"),
+                                        time: stack_data.remove("DTPOSTED"),
                                         name: stack_data.remove("NAME"),
+                                        memo: stack_data.remove("MEMO"),
                                         amount: stack_data.remove("TRNAMT"),
                                         kind: stack_data.remove("TRNTYPE"),
+                                        check_num: stack_data.remove("CHECKNUM"),
+                                        ref_num: stack_data.remove("REFNUM"),
                                     });
                                 },
 

@@ -1,4 +1,4 @@
-use ofx::bank::Bank;
+use ofx::Ofx;
 
 pub struct Vanguard<'a> {
     username: &'a str,
@@ -14,7 +14,7 @@ impl<'a> Vanguard<'a> {
     }
 }
 
-impl<'a> Bank for Vanguard<'a> {
+impl<'a> Ofx for Vanguard<'a> {
     fn url(&self) -> &str {
         "https://vesnc.vanguard.com/us/OfxDirectConnectServlet"
     }

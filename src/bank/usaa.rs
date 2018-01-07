@@ -1,22 +1,22 @@
-use ofx::bank::Bank;
+use ofx::Ofx;
 
-pub struct Tangerine<'a> {
+pub struct Usaa<'a> {
     username: &'a str,
     password: &'a str,
 }
 
-impl<'a> Tangerine<'a> {
-    pub fn new(username: &'a str, password: &'a str) -> Tangerine<'a> {
-        Tangerine {
+impl<'a> Usaa<'a> {
+    pub fn new(username: &'a str, password: &'a str) -> Usaa<'a> {
+        Usaa {
             username: username,
             password: password,
         }
     }
 }
 
-impl<'a> Bank for Tangerine<'a> {
+impl<'a> Ofx for Usaa<'a> {
     fn url(&self) -> &str {
-        "https://ofx.tangerine.ca"
+        "https://service2.usaa.com/ofx/OFXServlet"
     }
 
     fn username(&self) -> &str {
@@ -28,14 +28,18 @@ impl<'a> Bank for Tangerine<'a> {
     }
 
     fn fid(&self) -> &str {
-        "10951"
+        "24591"
     }
 
     fn fid_org(&self) -> &str {
-        "TangerineBank"
+        "USAA"
     }
 
     fn bank_id(&self) -> &str {
-        "00152614"
+        "314074269"
+    }
+
+    fn broker_id(&self) -> &str {
+        "USAA.COM"
     }
 }

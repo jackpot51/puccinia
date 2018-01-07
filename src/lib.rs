@@ -8,6 +8,7 @@ extern crate mime;
 extern crate rand;
 extern crate xml;
 
+pub mod bank;
 pub mod crypto;
 pub mod ofx;
 
