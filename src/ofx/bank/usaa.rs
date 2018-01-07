@@ -1,8 +1,13 @@
 use chrono::{Date, TimeZone};
-use ofx::Request;
+use ofx::{ofx, Request, Response};
+use std::fmt::Display;
 
-pub fn ofx_request<'a, Tz: TimeZone>(user: &'a str, password: &'a str, account_id: &'a str, account_type: &'a str, start: &'a Date<Tz>, end: &'a Date<Tz>) -> Request<'a, Tz> {
-    Request {
+pub fn usaa<'a, Tz: TimeZone>(
+    user: &'a str, password: &'a str,
+    account_id: &'a str, account_type: &'a str,
+    start: &'a Date<Tz>, end: &'a Date<Tz>
+) -> Result<Response, String> where Tz::Offset: Display {
+    ofx(Request {
         url: "https://service2.usaa.com/ofx/OFXServlet",
         ofx_ver: "102",
 
@@ -20,5 +25,5 @@ pub fn ofx_request<'a, Tz: TimeZone>(user: &'a str, password: &'a str, account_i
         account_type: account_type,
         start: start,
         end: end
-    }
+    })
 }
