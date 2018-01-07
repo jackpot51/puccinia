@@ -1,4 +1,4 @@
-use chrono::{Date, Local, TimeZone};
+use chrono::{Date, Local, TimeZone, Utc};
 use rand::{Rng, thread_rng};
 use std::fmt::Display;
 use std::io::{self, Write};
@@ -31,7 +31,7 @@ pub fn date_string<Tz: TimeZone>(date: &Date<Tz>) -> String where Tz::Offset: Di
 //     CreditCard
 // }
 
-pub struct Request<'a, Tz: TimeZone + 'a> {
+pub struct Request<'a> {
     pub url: &'a str,
     pub ofx_ver: &'a str,
 
@@ -48,14 +48,14 @@ pub struct Request<'a, Tz: TimeZone + 'a> {
     pub bank_id: &'a str,
     pub account_id: &'a str,
     pub account_type: &'a str,
-    pub start: &'a Date<Tz>,
-    pub end: &'a Date<Tz>,
+    pub start: Option<Date<Utc>>,
+    pub end: Option<Date<Utc>>,
 
     //
     //pub broker_id: &'a str,
 }
 
-impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
+impl<'a> Request<'a> {
     fn write_header<W: Write>(&self, w: &mut W) -> io::Result<()> {
         write!(w, "OFXHEADER:100\r\n")?;
         write!(w, "DATA:OFXSGML\r\n")?;
@@ -116,7 +116,7 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
         Ok(())
     }
 
-    pub fn encode(&self) -> Result<Vec<u8>> where Tz::Offset: Display {
+    pub fn encode(&self) -> Result<Vec<u8>> {
         let mut data = Vec::new();
 
         self.write_header(&mut data).map_err(|err| {
@@ -191,11 +191,15 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
 
                                     w.write(XmlEvent::start_element("INCTRAN"))?;
                                     {
-                                        w.write(XmlEvent::start_element("DTSTART"))?;
-                                        w.write(XmlEvent::characters(&date_string(&self.start)))?;
+                                        if let Some(ref start) = self.start {
+                                            w.write(XmlEvent::start_element("DTSTART"))?;
+                                            w.write(XmlEvent::characters(&date_string(start)))?;
+                                        }
 
-                                        w.write(XmlEvent::start_element("DTEND"))?;
-                                        w.write(XmlEvent::characters(&date_string(&self.end)))?;
+                                        if let Some(ref end) = self.end {
+                                            w.write(XmlEvent::start_element("DTEND"))?;
+                                            w.write(XmlEvent::characters(&date_string(end)))?;
+                                        }
 
                                         w.write(XmlEvent::start_element("INCLUDE"))?;
                                         w.write(XmlEvent::characters("Y"))?;
@@ -249,11 +253,15 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
 
                                     w.write(XmlEvent::start_element("INCTRAN"))?;
                                     {
-                                        w.write(XmlEvent::start_element("DTSTART"))?;
-                                        w.write(XmlEvent::characters(&date_string(&self.start)))?;
+                                        if let Some(ref start) = self.start {
+                                            w.write(XmlEvent::start_element("DTSTART"))?;
+                                            w.write(XmlEvent::characters(&date_string(start)))?;
+                                        }
 
-                                        w.write(XmlEvent::start_element("DTEND"))?;
-                                        w.write(XmlEvent::characters(&date_string(&self.end)))?;
+                                        if let Some(ref end) = self.end {
+                                            w.write(XmlEvent::start_element("DTEND"))?;
+                                            w.write(XmlEvent::characters(&date_string(end)))?;
+                                        }
 
                                         w.write(XmlEvent::start_element("INCLUDE"))?;
                                         w.write(XmlEvent::characters("Y"))?;
@@ -300,11 +308,15 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
 
                                     w.write(XmlEvent::start_element("INCTRAN"))?;
                                     {
-                                        w.write(XmlEvent::start_element("DTSTART"))?;
-                                        w.write(XmlEvent::characters(&date_string(&self.start)))?;
+                                        if let Some(ref start) = self.start {
+                                            w.write(XmlEvent::start_element("DTSTART"))?;
+                                            w.write(XmlEvent::characters(&date_string(start)))?;
+                                        }
 
-                                        w.write(XmlEvent::start_element("DTEND"))?;
-                                        w.write(XmlEvent::characters(&date_string(&self.end)))?;
+                                        if let Some(ref end) = self.end {
+                                            w.write(XmlEvent::start_element("DTEND"))?;
+                                            w.write(XmlEvent::characters(&date_string(end)))?;
+                                        }
 
                                         w.write(XmlEvent::start_element("INCLUDE"))?;
                                         w.write(XmlEvent::characters("Y"))?;

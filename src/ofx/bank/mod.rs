@@ -1,5 +1,4 @@
-use chrono::{Date, Local, TimeZone};
-use std::fmt::Display;
+use chrono::{Date, Utc};
 
 pub use self::amex::Amex;
 pub use self::usaa::Usaa;
@@ -50,7 +49,7 @@ pub trait Bank {
         ""
     }
 
-    fn ofx<Tz: TimeZone>(&self, account_id: &str, account_type: &str, start: &Date<Tz>, end: &Date<Tz>) -> Result<Response, String> where Tz::Offset: Display {
+    fn ofx(&self, account_id: &str, account_type: &str, start: Option<Date<Utc>>, end: Option<Date<Utc>>) -> Result<Response, String> {
         ofx(Request {
             url: self.url(),
             ofx_ver: self.ofx_ver(),
@@ -75,36 +74,6 @@ pub trait Bank {
     }
 
     fn accounts(&self) -> Result<Response, String> {
-        self.ofx("", "", &Local::today(), &Local::today())
+        self.ofx("", "", None, None)
     }
-
-
-    /*
-    pub fn usaa<'a, Tz: TimeZone>(
-        user: &'a str, password: &'a str,
-        account_id: &'a str, account_type: &'a str,
-        start: &'a Date<Tz>, end: &'a Date<Tz>
-    ) -> Result<Response, String> where Tz::Offset: Display {
-        ofx(Request {
-            url: "https://service2.usaa.com/ofx/OFXServlet",
-            ofx_ver: "102",
-
-            user: user,
-            password: password,
-            language: "ENG",
-            fid: "24591",
-            fid_org: "USAA",
-            app_id: "QBKS",
-            app_ver: "1900",
-            client_id: "",
-
-            bank_id: "314074269",
-            broker_id: "USAA.COM",
-            account_id: account_id,
-            account_type: account_type,
-            start: start,
-            end: end
-        })
-    }
-    */
 }

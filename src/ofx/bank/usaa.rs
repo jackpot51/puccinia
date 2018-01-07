@@ -6,10 +6,10 @@ pub struct Usaa<'a> {
 }
 
 impl<'a> Usaa<'a> {
-    pub fn new(user_id: &'a str, pin: &'a str) -> Usaa<'a> {
+    pub fn new(username: &'a str, password: &'a str) -> Usaa<'a> {
         Usaa {
-            username: user_id,
-            password: pin,
+            username: username,
+            password: password,
         }
     }
 }

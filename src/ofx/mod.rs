@@ -1,4 +1,3 @@
-use chrono::TimeZone;
 use hyper::Client;
 use hyper::client::Body;
 use hyper::net::HttpsConnector;
@@ -6,7 +5,6 @@ use hyper::header::{Accept, Connection, ConnectionOption, ContentType, UserAgent
 use hyper::status::StatusCode;
 use hyper_native_tls::NativeTlsClient;
 use std::{str, time};
-use std::fmt::Display;
 use std::io::Read;
 
 pub use self::request::Request;
@@ -16,7 +14,7 @@ pub mod bank;
 mod request;
 mod response;
 
-pub fn ofx<'a, Tz: TimeZone>(request: Request<'a, Tz>) -> Result<Response, String> where Tz::Offset: Display {
+pub fn ofx<'a>(request: Request<'a>) -> Result<Response, String> {
     let request_data = request.encode().map_err(|err| format!("{}", err))?;
 
     let tls_client = NativeTlsClient::new().map_err(|err| format!("{}", err))?;
