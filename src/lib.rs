@@ -25,7 +25,9 @@ pub struct Puccinia {
 
 #[derive(Deserialize, Serialize)]
 pub struct Config {
+    #[serde(default)]
     pub bank: Vec<BankConfig>,
+    #[serde(default)]
     pub crypto: Vec<CryptoConfig>,
 }
 
