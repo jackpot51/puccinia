@@ -18,12 +18,24 @@ pub struct Account {
     pub id: Option<String>,
     pub kind: Option<String>,
     pub bank_id: Option<String>,
+    pub broker_id: Option<String>,
 }
 
 #[derive(Debug, Default)]
 pub struct Balance {
     pub amount: Option<String>,
     pub time: Option<String>,
+}
+
+#[derive(Debug, Default)]
+pub struct Position {
+    pub time: Option<String>,
+    pub held_in_account: Option<String>,
+    pub memo: Option<String>,
+    pub market_value: Option<String>,
+    pub kind: Option<String>,
+    pub unit_price: Option<String>,
+    pub units: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -47,6 +59,7 @@ pub struct Response {
     pub balance: Option<Balance>,
     pub start: Option<String>,
     pub end: Option<String>,
+    pub positions: Vec<Position>,
     pub transactions: Vec<Transaction>,
 }
 
@@ -117,6 +130,7 @@ impl Response {
                                     response.fid_org = stack_data.remove("ORG");
                                 },
 
+                                "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS" => {
                                     println!("Statement");
                                     response.currency = stack_data.remove("CURDEF");
@@ -129,9 +143,32 @@ impl Response {
                                         id: stack_data.remove("ACCTID"),
                                         kind: stack_data.remove("ACCTTYPE"),
                                         bank_id: stack_data.remove("BANKID"),
+                                        broker_id: stack_data.remove("BROKERID")
                                     });
                                 },
 
+                                "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO/CCACCTINFO/CCACCTFROM" |
+                                "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/CCACCTFROM" => {
+                                    println!("Account");
+                                    response.accounts.push(Account {
+                                        id: stack_data.remove("ACCTID"),
+                                        kind: Some("CREDITCARD".to_string()),
+                                        bank_id: None,
+                                        broker_id: None
+                                    });
+                                },
+
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVACCTFROM" => {
+                                    println!("Account");
+                                    response.accounts.push(Account {
+                                        id: stack_data.remove("ACCTID"),
+                                        kind: Some("INVESTMENT".to_string()),
+                                        bank_id: None,
+                                        broker_id: stack_data.remove("BROKERID")
+                                    });
+                                },
+
+                                "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/LEDGERBAL" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/LEDGERBAL" => {
                                     println!("Balance");
                                     response.balance = Some(Balance {
@@ -140,12 +177,14 @@ impl Response {
                                     });
                                 },
 
+                                "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/BANKTRANLIST" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST" => {
                                     println!("Transaction list");
                                     response.start = stack_data.remove("DTSTART");
                                     response.end = stack_data.remove("DTEND");
                                 },
 
+                                "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/BANKTRANLIST/STMTTRN" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST/STMTTRN" => {
                                     println!("Transaction");
                                     response.transactions.push(Transaction {
@@ -155,6 +194,19 @@ impl Response {
                                         name: stack_data.remove("NAME"),
                                         amount: stack_data.remove("TRNAMT"),
                                         kind: stack_data.remove("TRNTYPE"),
+                                    });
+                                },
+
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS" => {
+                                    println!("Position");
+                                    response.positions.push(Position {
+                                        time: stack_data.remove("DTPRICEASOF"),
+                                        held_in_account: stack_data.remove("HELDINACCT"),
+                                        memo: stack_data.remove("MEMO"),
+                                        market_value: stack_data.remove("MKTVAL"),
+                                        kind: stack_data.remove("POSTYPE"),
+                                        unit_price: stack_data.remove("UNITPRICE"),
+                                        units: stack_data.remove("UNITS")
                                     });
                                 },
 

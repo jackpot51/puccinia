@@ -23,13 +23,13 @@ pub fn date_string<Tz: TimeZone>(date: &Date<Tz>) -> String where Tz::Offset: Di
 }
 
 //TODO
-pub enum AccountType {
-    Checking,
-    Savings,
-    Investment,
-    MoneyMarket,
-    CreditCard
-}
+// pub enum AccountType {
+//     Checking,
+//     Savings,
+//     Investment,
+//     MoneyMarket,
+//     CreditCard
+// }
 
 pub struct Request<'a, Tz: TimeZone + 'a> {
     pub url: &'a str,
@@ -224,6 +224,49 @@ impl<'a, Tz: TimeZone + 'a> Request<'a, Tz> {
                     w.write(XmlEvent::end_element().name("OFX"))?;
                 },
                 "CREDITCARD" => {
+                    w.write(XmlEvent::start_element("OFX"))?;
+                    {
+                        self.write_signon(&mut w)?;
+
+                        w.write(XmlEvent::start_element("CREDITCARDMSGSRQV1"))?;
+                        {
+                            w.write(XmlEvent::start_element("CCSTMTTRNRQ"))?;
+                            {
+                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                w.write(XmlEvent::characters(&random_string(32)))?;
+
+                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
+                                w.write(XmlEvent::characters(&random_string(5)))?;
+
+                                w.write(XmlEvent::start_element("CCSTMTRQ"))?;
+                                {
+                                    w.write(XmlEvent::start_element("CCACCTFROM"))?;
+                                    {
+                                        w.write(XmlEvent::start_element("ACCTID"))?;
+                                        w.write(XmlEvent::characters(self.account_id))?;
+                                    }
+                                    w.write(XmlEvent::end_element().name("CCACCTFROM"))?;
+
+                                    w.write(XmlEvent::start_element("INCTRAN"))?;
+                                    {
+                                        w.write(XmlEvent::start_element("DTSTART"))?;
+                                        w.write(XmlEvent::characters(&date_string(&self.start)))?;
+
+                                        w.write(XmlEvent::start_element("DTEND"))?;
+                                        w.write(XmlEvent::characters(&date_string(&self.end)))?;
+
+                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        w.write(XmlEvent::characters("Y"))?;
+                                    }
+                                    w.write(XmlEvent::end_element().name("INCTRAN"))?;
+                                }
+                                w.write(XmlEvent::end_element().name("CCSTMTRQ"))?;
+                            }
+                            w.write(XmlEvent::end_element().name("CCSTMTTRNRQ"))?;
+                        }
+                        w.write(XmlEvent::end_element().name("CREDITCARDMSGSRQV1"))?;
+                    }
+                    w.write(XmlEvent::end_element().name("OFX"))?;
                 },
                 _ => {
                     w.write(XmlEvent::start_element("OFX"))?;

@@ -5,6 +5,7 @@ authors = ["Jeremy Soller <jackpot51@gmail.com>"]
 
 [dependencies]
 chrono = "0.4"
+decimal = "2.0"
 hyper-native-tls = "0.2"
 mime = "0.2"
 rand = "0.4"
