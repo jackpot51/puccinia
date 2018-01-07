@@ -1,9 +1,11 @@
 use chrono::{Date, Local, TimeZone};
 use std::fmt::Display;
 
+pub use self::amex::Amex;
 pub use self::usaa::Usaa;
 pub use self::vanguard::Vanguard;
 
+mod amex;
 mod usaa;
 mod vanguard;
 

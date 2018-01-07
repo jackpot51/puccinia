@@ -1,12 +1,13 @@
 use std::collections::BTreeMap;
+use std::str;
 use xml::reader::{ParserConfig, XmlEvent, Result};
 
 fn header_length(data: &[u8]) -> Option<usize> {
-    let search = b"\r\n\r\n";
-
-    for len in search.len()..data.len() {
-        if &data[len - search.len() .. len] == search {
-            return Some(len);
+    for search in &["\r\n\r\n", "\n\n"] {
+        for len in search.len()..data.len() {
+            if &data[len - search.len() .. len] == search.as_bytes() {
+                return Some(len);
+            }
         }
     }
 
@@ -70,7 +71,7 @@ impl Response {
         let header_len = match header_length(data) {
             Some(len) => len,
             None => {
-                panic!("Header not terminated. Produce an error!");
+                panic!("Header not terminated. Produce an error!\n{:?}", str::from_utf8(data));
             }
         };
 
