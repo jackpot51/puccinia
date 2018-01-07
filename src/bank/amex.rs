@@ -1,12 +1,12 @@
 use ofx::Ofx;
 
-pub struct Amex<'a> {
-    username: &'a str,
-    password: &'a str,
+pub struct Amex {
+    username: String,
+    password: String,
 }
 
-impl<'a> Amex<'a> {
-    pub fn new(username: &'a str, password: &'a str) -> Amex<'a> {
+impl Amex {
+    pub fn new(username: String, password: String) -> Amex {
         Amex {
             username: username,
             password: password,
@@ -14,17 +14,17 @@ impl<'a> Amex<'a> {
     }
 }
 
-impl<'a> Ofx for Amex<'a> {
+impl Ofx for Amex {
     fn url(&self) -> &str {
         "https://online.americanexpress.com/myca/ofxdl/desktop/desktopDownload.do?request_type=nl_ofxdownload"
     }
 
     fn username(&self) -> &str {
-        self.username
+        &self.username
     }
 
     fn password(&self) -> &str {
-        self.password
+        &self.password
     }
 
     fn fid(&self) -> &str {

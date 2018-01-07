@@ -1,12 +1,12 @@
 use ofx::Ofx;
 
-pub struct Tangerine<'a> {
-    username: &'a str,
-    password: &'a str,
+pub struct Tangerine {
+    username: String,
+    password: String,
 }
 
-impl<'a> Tangerine<'a> {
-    pub fn new(username: &'a str, password: &'a str) -> Tangerine<'a> {
+impl Tangerine {
+    pub fn new(username: String, password: String) -> Tangerine {
         Tangerine {
             username: username,
             password: password,
@@ -14,17 +14,17 @@ impl<'a> Tangerine<'a> {
     }
 }
 
-impl<'a> Ofx for Tangerine<'a> {
+impl Ofx for Tangerine {
     fn url(&self) -> &str {
         "https://ofx.tangerine.ca"
     }
 
     fn username(&self) -> &str {
-        self.username
+        &self.username
     }
 
     fn password(&self) -> &str {
-        self.password
+        &self.password
     }
 
     fn fid(&self) -> &str {

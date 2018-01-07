@@ -11,12 +11,30 @@ use self::blockchain_info::BlockchainInfoApi;
 
 mod blockchain_info;
 
-pub struct Bitcoin;
+pub struct Bitcoin {
+    address: String
+}
+
+impl Bitcoin {
+    pub fn new(address: String) -> Bitcoin {
+        Bitcoin {
+            address: address
+        }
+    }
+}
 
 impl Crypto for Bitcoin {
-    fn balance(address: &str) -> Result<d128, String> {
+    fn name(&self) -> &str {
+        "bitcoin"
+    }
+
+    fn address(&self) -> &str {
+        &self.address
+    }
+
+    fn balance(&self) -> Result<d128, String> {
         let api = BlockchainInfoApi;
-        let response = api.address_balance(address)?;
+        let response = api.address_balance(&self.address)?;
 
         let satoshi = d128::from_str(&response).map_err(|_err| {
             format!("invalid decimal: {}", response)
@@ -25,7 +43,7 @@ impl Crypto for Bitcoin {
         Ok(satoshi/d128!(100000000))
     }
 
-    fn exchange_rate() -> Result<d128, String> {
+    fn rate(&self) -> Result<d128, String> {
         let creds = GdaxCreds::new("", "", "", "");
 
         let mut api = Coinnect::new(Gdax, creds).map_err(|err| {

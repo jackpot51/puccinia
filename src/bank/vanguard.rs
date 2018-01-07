@@ -1,12 +1,12 @@
 use ofx::Ofx;
 
-pub struct Vanguard<'a> {
-    username: &'a str,
-    password: &'a str,
+pub struct Vanguard {
+    username: String,
+    password: String,
 }
 
-impl<'a> Vanguard<'a> {
-    pub fn new(username: &'a str, password: &'a str) -> Vanguard<'a> {
+impl Vanguard {
+    pub fn new(username: String, password: String) -> Vanguard {
         Vanguard {
             username: username,
             password: password,
@@ -14,17 +14,17 @@ impl<'a> Vanguard<'a> {
     }
 }
 
-impl<'a> Ofx for Vanguard<'a> {
+impl Ofx for Vanguard {
     fn url(&self) -> &str {
         "https://vesnc.vanguard.com/us/OfxDirectConnectServlet"
     }
 
     fn username(&self) -> &str {
-        self.username
+        &self.username
     }
 
     fn password(&self) -> &str {
-        self.password
+        &self.password
     }
 
     fn fid(&self) -> &str {

@@ -1,12 +1,12 @@
 use ofx::Ofx;
 
-pub struct Usaa<'a> {
-    username: &'a str,
-    password: &'a str,
+pub struct Usaa {
+    username: String,
+    password: String,
 }
 
-impl<'a> Usaa<'a> {
-    pub fn new(username: &'a str, password: &'a str) -> Usaa<'a> {
+impl Usaa {
+    pub fn new(username: String, password: String) -> Usaa {
         Usaa {
             username: username,
             password: password,
@@ -14,17 +14,17 @@ impl<'a> Usaa<'a> {
     }
 }
 
-impl<'a> Ofx for Usaa<'a> {
+impl Ofx for Usaa {
     fn url(&self) -> &str {
         "https://service2.usaa.com/ofx/OFXServlet"
     }
 
     fn username(&self) -> &str {
-        self.username
+        &self.username
     }
 
     fn password(&self) -> &str {
-        self.password
+        &self.password
     }
 
     fn fid(&self) -> &str {
