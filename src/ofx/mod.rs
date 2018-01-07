@@ -105,8 +105,4 @@ pub trait Ofx {
             }
         }
     }
-
-    fn accounts(&self) -> Result<Response, String> {
-        self.ofx("", "", None, None)
-    }
 }
