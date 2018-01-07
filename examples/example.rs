@@ -55,6 +55,12 @@ fn main() {
             println!("{}: {} @ {}", address, balance, rate);
             balances.push((format!("{}_{}", name, address), balance * rate));
         }
+
+        for custom in &puccinia.custom {
+            let name = custom.name();
+            let amount = custom.amount();
+            balances.push((format!("{}", name), amount));
+        }
     }
 
     let mut balances_unique = BTreeMap::new();

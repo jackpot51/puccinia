@@ -1,3 +1,18 @@
+# Before putting in your personal details, copy this file to secret.toml
+
+# Unfortunately, there is no example OFX API that can be used for demonstration
+# Uncomment the following lines and edit to your own details to use
+# [[bank]]
+# kind = "example"
+# username = "username"
+# password = "password"
+
+# This is the Redox OS donation address
 [[crypto]]
 kind = "bitcoin"
 address = "1MD8PqWMUhNPBR6YhYUUgrztEJ6StkxGQK"
+
+# Custom entries can have any name or amount
+[[custom]]
+name = "custom"
+amount = "1234.56"
