@@ -32,7 +32,7 @@ impl Crypto for Bitcoin {
         &self.address
     }
 
-    fn balance(&self) -> Result<d128, String> {
+    fn amount(&self) -> Result<d128, String> {
         let api = BlockchainInfoApi;
         let response = api.address_balance(&self.address)?;
 

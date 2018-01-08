@@ -10,10 +10,9 @@ extern crate rand;
 extern crate serde_derive;
 extern crate xml;
 
-use bank::BankConfig;
+use bank::{Bank, BankConfig};
 use crypto::{Crypto, CryptoConfig};
 use custom::{Custom, CustomConfig};
-use ofx::Ofx;
 
 pub mod bank;
 pub mod crypto;
@@ -21,7 +20,7 @@ pub mod custom;
 pub mod ofx;
 
 pub struct Puccinia {
-    pub bank: Vec<Box<Ofx>>,
+    pub bank: Vec<Box<Bank>>,
     pub crypto: Vec<Box<Crypto>>,
     pub custom: Vec<Custom>,
 }

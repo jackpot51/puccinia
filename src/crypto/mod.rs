@@ -7,7 +7,7 @@ mod bitcoin;
 pub trait Crypto {
     fn name(&self) -> &str;
     fn address(&self) -> &str;
-    fn balance(&self) -> Result<d128, String>;
+    fn amount(&self) -> Result<d128, String>;
     fn rate(&self) -> Result<d128, String>;
 }
 

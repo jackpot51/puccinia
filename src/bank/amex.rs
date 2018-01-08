@@ -1,16 +1,39 @@
+use decimal::d128;
+
+use bank::{Bank, BankAccount};
 use ofx::Ofx;
 
 pub struct Amex {
     username: String,
     password: String,
+    accounts: Option<Vec<BankAccount>>,
 }
 
 impl Amex {
-    pub fn new(username: String, password: String) -> Amex {
+    pub fn new(username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Amex {
         Amex {
             username: username,
             password: password,
+            accounts: accounts,
         }
+    }
+}
+
+impl Bank for Amex {
+    fn name(&self) -> &str {
+        "amex"
+    }
+
+    fn accounts(&self) -> Result<Vec<BankAccount>, String> {
+        if let Some(ref accounts) = self.accounts {
+            Ok(accounts.clone())
+        } else {
+            self.ofx_accounts()
+        }
+    }
+
+    fn amount(&self, account: &BankAccount) -> Result<d128, String> {
+        self.ofx_amount(&account.id, &account.kind)
     }
 }
 

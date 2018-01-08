@@ -1,4 +1,5 @@
 use chrono::{Date, Utc};
+use decimal::d128;
 use hyper::Client;
 use hyper::client::Body;
 use hyper::net::HttpsConnector;
@@ -7,6 +8,9 @@ use hyper::status::StatusCode;
 use hyper_native_tls::NativeTlsClient;
 use std::{str, time};
 use std::io::Read;
+use std::str::FromStr;
+
+use bank::BankAccount;
 
 pub use self::request::Request;
 pub use self::response::Response;
@@ -51,6 +55,48 @@ pub trait Ofx {
 
     fn broker_id(&self) -> &str {
         ""
+    }
+
+    fn ofx_accounts(&self) -> Result<Vec<BankAccount>, String> {
+        let mut accounts = Vec::new();
+
+        let response = self.ofx("", "", None, None)?;
+        for account in response.accounts {
+            if let Some(id) = account.id {
+                if let Some(kind) = account.kind {
+                    accounts.push(BankAccount {
+                        id: id,
+                        kind: kind
+                    });
+                }
+            }
+        }
+
+        Ok(accounts)
+    }
+
+    fn ofx_amount(&self, account_id: &str, account_type: &str) -> Result<d128, String> {
+        let response = self.ofx(account_id, account_type, None, None)?;
+
+        let mut total = d128::zero();
+
+        if let Some(balance) = response.balance {
+            if let Some(amount) = balance.amount {
+                total += d128::from_str(&amount).map_err(|_err| {
+                    format!("invalid decimal: {}", amount)
+                })?;
+            }
+        }
+
+        for position in response.positions {
+            if let Some(market_value) = position.market_value {
+                total += d128::from_str(&market_value).map_err(|_err| {
+                    format!("invalid decimal: {}", market_value)
+                })?;
+            }
+        }
+
+        Ok(total)
     }
 
     fn ofx(&self, account_id: &str, account_type: &str, start: Option<Date<Utc>>, end: Option<Date<Utc>>) -> Result<Response, String> {
