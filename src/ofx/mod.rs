@@ -123,6 +123,7 @@ pub trait Ofx {
         };
 
         let request_data = request.encode().map_err(|err| format!("{}", err))?;
+        println!("Request: [\n{}\n]", str::from_utf8(&request_data).unwrap_or("[Invalid UTF-8]"));
 
         let tls_client = NativeTlsClient::new().map_err(|err| format!("{}", err))?;
         let connector = HttpsConnector::new(tls_client);
@@ -141,6 +142,7 @@ pub trait Ofx {
 
         let mut response_data = Vec::new();
         response.read_to_end(&mut response_data).map_err(|err| format!("{}", err))?;
+        println!("Response: [\n{}\n]", str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]"));
 
         match response.status {
             StatusCode::Ok => {
