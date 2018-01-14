@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>puccinia</title>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    </head>
+    <body class="container">
+        <h3>puccinia</h3>
+
+        <div class="list-group">
+            <li class="list-group-item active">Banks</li>
+            {{#each bank}}
+                <a href="/bank/{{id}}" class="list-group-item list-group-item-action">{{name}}</a>
+            {{/each}}
+        </div>
+        <br/>
+
+        <div class="list-group">
+            <li class="list-group-item active">Crypto</li>
+            {{#each crypto}}
+                <a href="/crypto/{{id}}" class="list-group-item list-group-item-action">{{name}}</a>
+            {{/each}}
+        </div>
+        <br/>
+
+        <div class="list-group">
+            <li class="list-group-item active">Custom</li>
+            {{#each custom}}
+                <a href="/custom/{{id}}" class="list-group-item list-group-item-action">{{name}}</a>
+            {{/each}}
+        </div>
+    </body>
+</html>

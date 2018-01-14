@@ -2,17 +2,19 @@
 
 # Unfortunately, there is no example OFX API that can be used for demonstration
 # Uncomment the following lines and edit to your own details to use
-# [[bank]]
+# [bank.example]
 # kind = "example"
+# name = "Example Bank"
 # username = "username"
 # password = "password"
 
 # This is the Redox OS donation address
-[[crypto]]
+[crypto.example]
 kind = "bitcoin"
+name = "Redox OS Bitcoin Donation"
 address = "1MD8PqWMUhNPBR6YhYUUgrztEJ6StkxGQK"
 
-# Custom entries can have any name or amount
-[[custom]]
-name = "custom"
+# Custom entries can have any amount
+[custom.example]
+name = "Custom Example"
 amount = "1234.56"

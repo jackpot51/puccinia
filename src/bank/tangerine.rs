@@ -4,14 +4,16 @@ use bank::{Bank, BankAccount};
 use ofx::Ofx;
 
 pub struct Tangerine {
+    name: String,
     username: String,
     password: String,
     accounts: Option<Vec<BankAccount>>,
 }
 
 impl Tangerine {
-    pub fn new(username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Tangerine {
+    pub fn new(name: String, username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Tangerine {
         Tangerine {
+            name: name,
             username: username,
             password: password,
             accounts: accounts,
@@ -20,8 +22,12 @@ impl Tangerine {
 }
 
 impl Bank for Tangerine {
-    fn name(&self) -> &str {
+    fn kind(&self) -> &str {
         "tangerine"
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 
     fn accounts(&self) -> Result<Vec<BankAccount>, String> {
@@ -34,6 +40,10 @@ impl Bank for Tangerine {
 
     fn amount(&self, account: &BankAccount) -> Result<d128, String> {
         self.ofx_amount(&account.id, &account.kind)
+    }
+
+    fn as_ofx<'a>(&'a self) -> Option<&'a Ofx> {
+        Some(self as &Ofx)
     }
 }
 

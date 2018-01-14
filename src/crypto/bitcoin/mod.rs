@@ -12,20 +12,26 @@ use self::blockchain_info::BlockchainInfoApi;
 mod blockchain_info;
 
 pub struct Bitcoin {
+    name: String,
     address: String
 }
 
 impl Bitcoin {
-    pub fn new(address: String) -> Bitcoin {
+    pub fn new(name: String, address: String) -> Bitcoin {
         Bitcoin {
+            name: name,
             address: address
         }
     }
 }
 
 impl Crypto for Bitcoin {
-    fn name(&self) -> &str {
+    fn kind(&self) -> &str {
         "bitcoin"
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 
     fn address(&self) -> &str {

@@ -4,14 +4,16 @@ use bank::{Bank, BankAccount};
 use ofx::Ofx;
 
 pub struct Usaa {
+    name: String,
     username: String,
     password: String,
     accounts: Option<Vec<BankAccount>>,
 }
 
 impl Usaa {
-    pub fn new(username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Usaa {
+    pub fn new(name: String, username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Usaa {
         Usaa {
+            name: name,
             username: username,
             password: password,
             accounts: accounts,
@@ -20,8 +22,12 @@ impl Usaa {
 }
 
 impl Bank for Usaa {
-    fn name(&self) -> &str {
+    fn kind(&self) -> &str {
         "usaa"
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 
     fn accounts(&self) -> Result<Vec<BankAccount>, String> {
@@ -34,6 +40,10 @@ impl Bank for Usaa {
 
     fn amount(&self, account: &BankAccount) -> Result<d128, String> {
         self.ofx_amount(&account.id, &account.kind)
+    }
+
+    fn as_ofx<'a>(&'a self) -> Option<&'a Ofx> {
+        Some(self as &Ofx)
     }
 }
 

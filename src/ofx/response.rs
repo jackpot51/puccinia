@@ -30,6 +30,8 @@ pub struct Balance {
 
 #[derive(Debug, Default)]
 pub struct Position {
+    pub id: Option<String>,
+    pub id_kind: Option<String>,
     pub time: Option<String>,
     pub held_in_account: Option<String>,
     pub memo: Option<String>,
@@ -37,6 +39,16 @@ pub struct Position {
     pub kind: Option<String>,
     pub unit_price: Option<String>,
     pub units: Option<String>,
+}
+
+#[derive(Debug, Default)]
+pub struct Security {
+    pub id: Option<String>,
+    pub id_kind: Option<String>,
+    pub name: Option<String>,
+    pub ticker: Option<String>,
+    pub memo: Option<String>,
+    pub unit_price: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -63,6 +75,7 @@ pub struct Response {
     pub start: Option<String>,
     pub end: Option<String>,
     pub positions: Vec<Position>,
+    pub securities: Vec<Security>,
     pub transactions: Vec<Transaction>,
 }
 
@@ -88,6 +101,8 @@ impl Response {
             .ignore_end_of_stream(false)
             .create_reader(&mut xml_data);
 
+        let mut security_id = None;
+        let mut security_id_kind = None;
         let mut stack = Vec::new();
         for e_res in r {
             let e = e_res?;
@@ -205,6 +220,8 @@ impl Response {
                                 "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS" => {
                                     println!("Position");
                                     response.positions.push(Position {
+                                        id: security_id.take(),
+                                        id_kind: security_id_kind.take(),
                                         time: stack_data.remove("DTPRICEASOF"),
                                         held_in_account: stack_data.remove("HELDINACCT"),
                                         memo: stack_data.remove("MEMO"),
@@ -213,6 +230,30 @@ impl Response {
                                         unit_price: stack_data.remove("UNITPRICE"),
                                         units: stack_data.remove("UNITS")
                                     });
+                                },
+
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS/SECID" => {
+                                    println!("Position security id");
+                                    security_id = stack_data.remove("UNIQUEID");
+                                    security_id_kind = stack_data.remove("UNIQUEIDTYPE");
+                                },
+
+                                "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO" => {
+                                    println!("Security info");
+                                    response.securities.push(Security {
+                                        id: security_id.take(),
+                                        id_kind: security_id_kind.take(),
+                                        name: stack_data.remove("SECNAME"),
+                                        ticker: stack_data.remove("TICKER"),
+                                        memo: stack_data.remove("MEMO"),
+                                        unit_price: stack_data.remove("UNITPRICE")
+                                    });
+                                },
+
+                                "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO/SECID" => {
+                                    println!("Security info id");
+                                    security_id = stack_data.remove("UNIQUEID");
+                                    security_id_kind = stack_data.remove("UNIQUEIDTYPE");
                                 },
 
                                 _ => {

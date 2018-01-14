@@ -10,6 +10,8 @@ extern crate rand;
 extern crate serde_derive;
 extern crate xml;
 
+use std::collections::BTreeMap;
+
 use bank::{Bank, BankConfig};
 use crypto::{Crypto, CryptoConfig};
 use custom::{Custom, CustomConfig};
@@ -20,39 +22,39 @@ pub mod custom;
 pub mod ofx;
 
 pub struct Puccinia {
-    pub bank: Vec<Box<Bank>>,
-    pub crypto: Vec<Box<Crypto>>,
-    pub custom: Vec<Custom>,
+    pub bank: BTreeMap<String, Box<Bank>>,
+    pub crypto: BTreeMap<String, Box<Crypto>>,
+    pub custom: BTreeMap<String, Custom>,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct Config {
     #[serde(default)]
-    pub bank: Vec<BankConfig>,
+    pub bank: BTreeMap<String, BankConfig>,
     #[serde(default)]
-    pub crypto: Vec<CryptoConfig>,
+    pub crypto: BTreeMap<String, CryptoConfig>,
     #[serde(default)]
-    pub custom: Vec<CustomConfig>,
+    pub custom: BTreeMap<String, CustomConfig>,
 }
 
 impl Config {
     pub fn build(self) -> Result<Puccinia, String> {
         let mut puccinia = Puccinia {
-            bank: Vec::new(),
-            crypto: Vec::new(),
-            custom: Vec::new()
+            bank: BTreeMap::new(),
+            crypto: BTreeMap::new(),
+            custom: BTreeMap::new()
         };
 
-        for bank in self.bank {
-            puccinia.bank.push(bank.build()?);
+        for (id, bank) in self.bank {
+            puccinia.bank.insert(id, bank.build()?);
         }
 
-        for crypto in self.crypto {
-            puccinia.crypto.push(crypto.build()?);
+        for (id, crypto) in self.crypto {
+            puccinia.crypto.insert(id, crypto.build()?);
         }
 
-        for custom in self.custom {
-            puccinia.custom.push(custom.build()?);
+        for (id, custom) in self.custom {
+            puccinia.custom.insert(id, custom.build()?);
         }
 
         Ok(puccinia)

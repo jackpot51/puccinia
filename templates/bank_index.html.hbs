@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>puccinia</title>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+    </head>
+    <body class="container">
+        <h3><a href="/">puccinia</a> &gt; {{name}}</h3>
+
+        {{#if accounts}}
+            <table class="table table-bordered table-hover table-sm">
+                <tbody>
+                    {{#each accounts}}
+                        <tr>
+                            <td><a href="/bank_account/{{../id}}/{{id}}/{{kind}}">{{kind}}_{{id}}</a></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        {{/if}}
+    </body>
+</html>
