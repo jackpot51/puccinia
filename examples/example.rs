@@ -28,14 +28,14 @@ fn main() {
         let config: Config = toml::from_str(&config_toml).unwrap();
         let puccinia = config.build().unwrap();
 
-        for bank in &puccinia.bank {
+        for (_id, bank) in &puccinia.bank {
             for account in bank.accounts().unwrap() {
                 let amount = bank.amount(&account).unwrap();
                 balances.push((format!("{}_{}_{}", bank.name(), account.kind, account.id), amount));
             }
         }
 
-        for crypto in &puccinia.crypto {
+        for (_id, crypto) in &puccinia.crypto {
             let name = crypto.name();
             let address = crypto.address();
             let amount = crypto.amount().unwrap();
@@ -44,7 +44,7 @@ fn main() {
             balances.push((format!("{}_{}", name, address), amount * rate));
         }
 
-        for custom in &puccinia.custom {
+        for (_id, custom) in &puccinia.custom {
             let name = custom.name();
             let amount = custom.amount();
             balances.push((format!("{}", name), amount));
