@@ -22,15 +22,6 @@ pub fn date_string<Tz: TimeZone>(date: &Date<Tz>) -> String where Tz::Offset: Di
     date.format("%Y%m%d").to_string()
 }
 
-//TODO
-// pub enum AccountType {
-//     Checking,
-//     Savings,
-//     Investment,
-//     MoneyMarket,
-//     CreditCard
-// }
-
 pub struct Request<'a> {
     pub url: &'a str,
     pub ofx_ver: &'a str,
@@ -50,9 +41,6 @@ pub struct Request<'a> {
     pub account_type: &'a str,
     pub start: Option<Date<Utc>>,
     pub end: Option<Date<Utc>>,
-
-    //
-    //pub broker_id: &'a str,
 }
 
 impl<'a> Request<'a> {

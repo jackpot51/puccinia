@@ -149,7 +149,8 @@ impl Response {
                                 },
 
                                 "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS" |
-                                "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS" => {
+                                "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS" => {
                                     println!("Statement");
                                     response.currency = stack_data.remove("CURDEF");
                                 },
@@ -196,14 +197,16 @@ impl Response {
                                 },
 
                                 "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/BANKTRANLIST" |
-                                "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST" => {
+                                "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST" => {
                                     println!("Transaction list");
                                     response.start = stack_data.remove("DTSTART");
                                     response.end = stack_data.remove("DTEND");
                                 },
 
                                 "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/BANKTRANLIST/STMTTRN" |
-                                "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST/STMTTRN" => {
+                                "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKTRANLIST/STMTTRN" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/INVBANKTRAN/STMTTRN" => {
                                     println!("Transaction");
                                     response.transactions.push(Transaction {
                                         id: stack_data.remove("FITID"),
