@@ -8,28 +8,48 @@
     </head>
     <body class="container">
         <h3>puccinia</h3>
-
-        <div class="list-group">
-            <li class="list-group-item active">Banks</li>
-            {{#each bank}}
-                <a href="/bank/{{id}}" class="list-group-item list-group-item-action">{{name}}</a>
-            {{/each}}
-        </div>
         <br/>
 
-        <div class="list-group">
-            <li class="list-group-item active">Crypto</li>
-            {{#each crypto}}
-                <a href="/crypto/{{id}}" class="list-group-item list-group-item-action">{{name}}</a>
-            {{/each}}
-        </div>
-        <br/>
+        {{#if bank}}
+            <h4>Banks</h4>
+            <table class="table table-bordered table-hover table-sm">
+                <tbody>
+                    {{#each bank}}
+                        <tr>
+                            <td><a href="/bank/{{id}}">{{name}}</a></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            <br/>
+        {{/if}}
 
-        <div class="list-group">
-            <li class="list-group-item active">Custom</li>
-            {{#each custom}}
-                <a href="/custom/{{id}}" class="list-group-item list-group-item-action">{{name}}</a>
-            {{/each}}
-        </div>
+        {{#if crypto}}
+            <h4>Crypto</h4>
+            <table class="table table-bordered table-hover table-sm">
+                <tbody>
+                    {{#each crypto}}
+                        <tr>
+                            <td><a href="/crypto/{{id}}">{{name}}</a></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            <br/>
+        {{/if}}
+
+        {{#if custom}}
+            <h4>Custom</h4>
+            <table class="table table-bordered table-hover table-sm">
+                <tbody>
+                    {{#each custom}}
+                        <tr>
+                            <td><a href="/custom/{{id}}">{{name}}</a></td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            <br/>
+        {{/if}}
     </body>
 </html>

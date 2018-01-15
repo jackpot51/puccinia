@@ -9,6 +9,7 @@
     <body class="container">
         <h3><a href="/">puccinia</a> &gt; <a href="/bank/{{bank_id}}">{{bank_name}}</a> &gt; {{kind}}_{{id}}</h3>
 
+        <br/>
         <table class="table table-bordered table-hover table-sm">
             <tbody>
                 <tr>
@@ -19,6 +20,7 @@
         </table>
 
         {{#if positions}}
+            <br/>
             <h4>Positions</h4>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
@@ -45,6 +47,7 @@
         {{/if}}
 
         {{#if transactions}}
+            <br/>
             <h4>Transactions</h4>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
