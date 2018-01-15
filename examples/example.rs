@@ -31,23 +31,21 @@ fn main() {
         for (_id, bank) in &puccinia.bank {
             for account in bank.accounts().unwrap() {
                 let amount = bank.amount(&account).unwrap();
-                balances.push((format!("{}_{}_{}", bank.name(), account.kind, account.id), amount));
+                balances.push((format!("{}_{}_{}", bank.kind(), account.kind, account.id), amount));
             }
         }
 
         for (_id, crypto) in &puccinia.crypto {
-            let name = crypto.name();
             let address = crypto.address();
             let amount = crypto.amount().unwrap();
             let rate = crypto.rate().unwrap();
             println!("{}: {} @ {}", address, amount, rate);
-            balances.push((format!("{}_{}", name, address), amount * rate));
+            balances.push((format!("{}_{}", crypto.kind(), address), amount * rate));
         }
 
-        for (_id, custom) in &puccinia.custom {
-            let name = custom.name();
+        for (id, custom) in &puccinia.custom {
             let amount = custom.amount();
-            balances.push((format!("{}", name), amount));
+            balances.push((format!("custom_{}", id), amount));
         }
     }
 
