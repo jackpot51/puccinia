@@ -11,6 +11,7 @@ path = "src/server/main.rs"
 chrono = "0.4"
 coinnect = "0.5"
 decimal = "2.0"
+dotenv = "0.10"
 hyper-native-tls = "0.2"
 mime = "0.2"
 rand = "0.4"
@@ -19,6 +20,10 @@ rocket_codegen = "0.3.6"
 serde = "1.0"
 serde_derive = "1.0"
 toml = "0.4"
+
+[dependencies.diesel]
+version = "1.0.0"
+features = ["sqlite"]
 
 [dependencies.hyper]
 version = "0.10"

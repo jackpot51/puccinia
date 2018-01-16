@@ -2,6 +2,9 @@ extern crate chrono;
 extern crate coinnect;
 #[macro_use]
 extern crate decimal;
+#[macro_use]
+extern crate diesel;
+extern crate dotenv;
 extern crate hyper;
 extern crate hyper_native_tls;
 extern crate mime;
@@ -19,6 +22,7 @@ use custom::{Custom, CustomConfig};
 pub mod bank;
 pub mod crypto;
 pub mod custom;
+pub mod database;
 pub mod ofx;
 
 pub struct Puccinia {
