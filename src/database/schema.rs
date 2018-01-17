@@ -11,6 +11,7 @@ table! {
     transactions (id) {
         id -> Integer,
         name -> Text,
+        time -> Text,
         amount -> Text,
     }
 }

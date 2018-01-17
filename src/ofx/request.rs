@@ -1,8 +1,9 @@
-use chrono::{Date, Local, TimeZone, Utc};
+use chrono::{Date, Utc};
 use rand::{Rng, thread_rng};
-use std::fmt::Display;
 use std::io::{self, Write};
 use xml::writer::{EventWriter, EmitterConfig, XmlEvent, Error, Result};
+
+use super::date_to_string;
 
 pub fn random_string(len: usize) -> String {
     let mut string = String::with_capacity(len);
@@ -16,10 +17,6 @@ pub fn random_string(len: usize) -> String {
     }
 
     string
-}
-
-pub fn date_string<Tz: TimeZone>(date: &Date<Tz>) -> String where Tz::Offset: Display {
-    date.format("%Y%m%d").to_string()
 }
 
 pub struct Request<'a> {
@@ -65,7 +62,7 @@ impl<'a> Request<'a> {
             w.write(XmlEvent::start_element("SONRQ"))?;
             {
                 w.write(XmlEvent::start_element("DTCLIENT"))?;
-                w.write(XmlEvent::characters(&date_string(&Local::today())))?;
+                w.write(XmlEvent::characters(&date_to_string(&Utc::today())))?;
 
                 w.write(XmlEvent::start_element("USERID"))?;
                 w.write(XmlEvent::characters(self.username))?;
@@ -181,12 +178,12 @@ impl<'a> Request<'a> {
                                     {
                                         if let Some(ref start) = self.start {
                                             w.write(XmlEvent::start_element("DTSTART"))?;
-                                            w.write(XmlEvent::characters(&date_string(start)))?;
+                                            w.write(XmlEvent::characters(&date_to_string(start)))?;
                                         }
 
                                         if let Some(ref end) = self.end {
                                             w.write(XmlEvent::start_element("DTEND"))?;
-                                            w.write(XmlEvent::characters(&date_string(end)))?;
+                                            w.write(XmlEvent::characters(&date_to_string(end)))?;
                                         }
 
                                         w.write(XmlEvent::start_element("INCLUDE"))?;
@@ -243,12 +240,12 @@ impl<'a> Request<'a> {
                                     {
                                         if let Some(ref start) = self.start {
                                             w.write(XmlEvent::start_element("DTSTART"))?;
-                                            w.write(XmlEvent::characters(&date_string(start)))?;
+                                            w.write(XmlEvent::characters(&date_to_string(start)))?;
                                         }
 
                                         if let Some(ref end) = self.end {
                                             w.write(XmlEvent::start_element("DTEND"))?;
-                                            w.write(XmlEvent::characters(&date_string(end)))?;
+                                            w.write(XmlEvent::characters(&date_to_string(end)))?;
                                         }
 
                                         w.write(XmlEvent::start_element("INCLUDE"))?;
@@ -298,12 +295,12 @@ impl<'a> Request<'a> {
                                     {
                                         if let Some(ref start) = self.start {
                                             w.write(XmlEvent::start_element("DTSTART"))?;
-                                            w.write(XmlEvent::characters(&date_string(start)))?;
+                                            w.write(XmlEvent::characters(&date_to_string(start)))?;
                                         }
 
                                         if let Some(ref end) = self.end {
                                             w.write(XmlEvent::start_element("DTEND"))?;
-                                            w.write(XmlEvent::characters(&date_string(end)))?;
+                                            w.write(XmlEvent::characters(&date_to_string(end)))?;
                                         }
 
                                         w.write(XmlEvent::start_element("INCLUDE"))?;

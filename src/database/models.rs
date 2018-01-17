@@ -20,6 +20,7 @@ pub struct NewPosition<'a> {
 pub struct Transaction {
     pub id: i32,
     pub name: String,
+    pub time: String,
     pub amount: String,
 }
 
@@ -27,5 +28,6 @@ pub struct Transaction {
 #[table_name = "transactions"]
 pub struct NewTransaction<'a> {
     pub name: &'a str,
+    pub time: &'a str,
     pub amount: &'a str,
 }

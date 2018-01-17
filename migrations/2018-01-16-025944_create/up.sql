@@ -8,5 +8,6 @@ create table positions (
 create table transactions (
   id integer not null primary key,
   name text not null,
+  time text not null,
   amount text not null
 );

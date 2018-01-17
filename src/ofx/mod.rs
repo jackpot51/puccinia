@@ -1,5 +1,4 @@
-use chrono::{Date, Utc};
-use decimal::d128;
+use chrono::{Date, TimeZone, Utc};
 use hyper::Client;
 use hyper::client::Body;
 use hyper::net::HttpsConnector;
@@ -8,7 +7,6 @@ use hyper::status::StatusCode;
 use hyper_native_tls::NativeTlsClient;
 use std::{str, time};
 use std::io::Read;
-use std::str::FromStr;
 
 use bank::BankAccount;
 
@@ -17,6 +15,28 @@ pub use self::response::Response;
 
 mod request;
 mod response;
+
+pub fn date_to_string(date: &Date<Utc>) -> String {
+    date.format("%Y%m%d").to_string()
+}
+
+pub fn string_to_date(string: &str) -> Result<Date<Utc>, String> {
+    let mut chars = string.chars();
+
+    let year = chars.by_ref().take(4).collect::<String>().parse().map_err(|err| {
+        format!("{}", err)
+    })?;
+
+    let month = chars.by_ref().take(2).collect::<String>().parse().map_err(|err| {
+        format!("{}", err)
+    })?;
+
+    let day = chars.by_ref().take(2).collect::<String>().parse().map_err(|err| {
+        format!("{}", err)
+    })?;
+
+    Ok(Utc.ymd(year, month, day))
+}
 
 pub trait Ofx {
     fn url(&self) -> &str;
@@ -73,30 +93,6 @@ pub trait Ofx {
         }
 
         Ok(accounts)
-    }
-
-    fn ofx_amount(&self, account_id: &str, account_type: &str) -> Result<d128, String> {
-        let response = self.ofx(account_id, account_type, None, None)?;
-
-        let mut total = d128::zero();
-
-        if let Some(balance) = response.balance {
-            if let Some(amount) = balance.amount {
-                total += d128::from_str(&amount).map_err(|_err| {
-                    format!("invalid decimal: {}", amount)
-                })?;
-            }
-        }
-
-        for position in response.positions {
-            if let Some(market_value) = position.market_value {
-                total += d128::from_str(&market_value).map_err(|_err| {
-                    format!("invalid decimal: {}", market_value)
-                })?;
-            }
-        }
-
-        Ok(total)
     }
 
     fn ofx(&self, account_id: &str, account_type: &str, start: Option<Date<Utc>>, end: Option<Date<Utc>>) -> Result<Response, String> {

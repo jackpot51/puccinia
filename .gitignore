@@ -1,5 +1,4 @@
 /target/
 **/*.rs.bk
 Cargo.lock
-secret.db
-secret.toml
+secret.*
