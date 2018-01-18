@@ -7,8 +7,8 @@ use chrono::{Utc, TimeZone};
 use diesel::prelude::*;
 use puccinia::Config;
 use puccinia::database::{establish_connection};
-use puccinia::database::models::{Position, NewPosition, Transaction, NewTransaction};
-use puccinia::database::schema::{positions, transactions};
+use puccinia::database::models::{Wallet, Account, Position, Transaction};
+use puccinia::database::schema::{wallets, accounts, positions, transactions};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -28,6 +28,14 @@ fn main() {
 
     let connection = establish_connection();
 
+    diesel::delete(wallets::table)
+        .execute(&connection)
+        .unwrap();
+
+    diesel::delete(accounts::table)
+        .execute(&connection)
+        .unwrap();
+
     diesel::delete(positions::table)
         .execute(&connection)
         .unwrap();
@@ -40,25 +48,48 @@ fn main() {
         let config: Config = toml::from_str(&config_toml).unwrap();
         let puccinia = config.build().unwrap();
 
-        for (_id, bank) in &puccinia.bank {
+        for (id, bank) in &puccinia.bank {
+            diesel::insert_into(wallets::table)
+                .values(&Wallet {
+                    id: id.to_string(),
+                    name: bank.name().to_string()
+                })
+                .execute(&connection)
+                .unwrap();
+
             for account in bank.accounts().unwrap() {
+                diesel::insert_into(accounts::table)
+                    .values(&Account {
+                        wallet_id: id.to_string(),
+                        id: account.id.clone(),
+                        name: format!("{}_{}", account.kind, account.id)
+                    })
+                    .execute(&connection)
+                    .unwrap();
+
                 let amount = bank.amount(&account).unwrap();
 
                 diesel::insert_into(positions::table)
-                    .values(&NewPosition {
-                        name: bank.name(),
-                        units: &format!("{}", amount),
-                        price: &format!("1"),
+                    .values(&Position {
+                        wallet_id: id.to_string(),
+                        account_id: account.id.clone(),
+                        id: "balance".to_string(),
+                        name: "Balance".to_string(),
+                        units: format!("{}", amount),
+                        price: format!("1"),
                     })
                     .execute(&connection)
                     .unwrap();
 
                 for transaction in bank.transactions(&account, Utc.ymd(2017, 12, 1), Utc::today()).unwrap() {
                     diesel::insert_into(transactions::table)
-                        .values(&NewTransaction {
-                            name: &transaction.name,
-                            time: &format!("{}", transaction.time.format("%Y-%m-%d")),
-                            amount: &format!("{}", transaction.amount),
+                        .values(&Transaction {
+                            wallet_id: id.to_string(),
+                            account_id: account.id.clone(),
+                            id: transaction.id,
+                            name: transaction.name,
+                            time: format!("{}", transaction.time.format("%Y-%m-%d")),
+                            amount: format!("{}", transaction.amount),
                         })
                         .execute(&connection)
                         .unwrap();
