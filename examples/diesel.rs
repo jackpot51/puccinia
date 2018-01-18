@@ -67,21 +67,23 @@ fn main() {
                     .execute(&connection)
                     .unwrap();
 
-                let amount = bank.amount(&account).unwrap();
+                let statement = bank.statement(&account, Utc.ymd(2017, 12, 1), Utc::today()).unwrap();
 
-                diesel::insert_into(positions::table)
-                    .values(&Position {
-                        wallet_id: id.to_string(),
-                        account_id: account.id.clone(),
-                        id: "balance".to_string(),
-                        name: "Balance".to_string(),
-                        units: format!("{}", amount),
-                        price: format!("1"),
-                    })
-                    .execute(&connection)
-                    .unwrap();
+                for position in statement.positions {
+                    diesel::insert_into(positions::table)
+                        .values(&Position {
+                            wallet_id: id.to_string(),
+                            account_id: account.id.clone(),
+                            id: position.id,
+                            name: position.name,
+                            units: format!("{}", position.units),
+                            price: format!("{}", position.price),
+                        })
+                        .execute(&connection)
+                        .unwrap();
+                }
 
-                for transaction in bank.transactions(&account, Utc.ymd(2017, 12, 1), Utc::today()).unwrap() {
+                for transaction in statement.transactions {
                     diesel::insert_into(transactions::table)
                         .values(&Transaction {
                             wallet_id: id.to_string(),
@@ -117,7 +119,7 @@ fn main() {
 
     println!("Displaying {} positions", positions.len());
     for position in positions {
-        println!("{}: {} x {}", position.name, position.units, position.price);
+        println!("{}: {}: {} x {}", position.id, position.name, position.units, position.price);
     }
 
     let transactions = transactions::table
@@ -127,6 +129,6 @@ fn main() {
 
     println!("Displaying {} transactions", transactions.len());
     for transaction in transactions {
-        println!("{}: {}: {}", transaction.time, transaction.name, transaction.amount);
+        println!("{}: {}: {}: {}", transaction.time, transaction.id, transaction.name, transaction.amount);
     }
 }
