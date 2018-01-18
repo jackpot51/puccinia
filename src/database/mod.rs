@@ -1,9 +1,22 @@
 use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
+use std::sync::{Mutex, MutexGuard};
 
 pub mod schema;
 pub mod models;
+
+pub struct ConnectionMutex(Mutex<SqliteConnection>);
+
+impl ConnectionMutex {
+    pub fn new() -> Self {
+        ConnectionMutex(Mutex::new(establish_connection()))
+    }
+
+    pub fn lock<'a>(&'a self) -> MutexGuard<'a, SqliteConnection> {
+        self.0.lock().unwrap()
+    }
+}
 
 pub fn establish_connection() -> SqliteConnection {
     dotenv().ok();

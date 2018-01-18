@@ -1,57 +1,30 @@
-use puccinia::Puccinia;
+use diesel::prelude::*;
+use puccinia::database::ConnectionMutex;
+use puccinia::database::models::Wallet;
+use puccinia::database::schema::wallets;
 use rocket::State;
 use rocket_contrib::Template;
 
 #[get("/")]
-pub fn index(puccinia: State<Puccinia>) -> Template {
-    #[derive(Serialize)]
-    struct Account {
-        id: String,
-        name: String,
-        kind: String,
-    }
+pub fn index(connection_mutex: State<ConnectionMutex>) -> Template {
+    let connection = connection_mutex.lock();
 
     #[derive(Serialize)]
     struct Context {
-        bank: Vec<Account>,
-        crypto: Vec<Account>,
-        custom: Vec<Account>,
+        wallets: Vec<Wallet>,
     }
 
     let mut context = Context {
-        bank: Vec::new(),
-        crypto: Vec::new(),
-        custom: Vec::new()
+        wallets: Vec::new()
     };
 
-    {
-        for (id, bank) in &puccinia.bank {
-            context.bank.push(Account {
-                id: id.to_string(),
-                name: bank.name().to_string(),
-                kind: bank.kind().to_string()
-            });
-        }
-    }
+    let wallets = wallets::table
+        .order(wallets::id.asc())
+        .load::<Wallet>(&*connection)
+        .unwrap();
 
-    {
-        for (id, crypto) in &puccinia.crypto {
-            context.crypto.push(Account {
-                id: id.to_string(),
-                name: crypto.name().to_string(),
-                kind: crypto.kind().to_string()
-            });
-        }
-    }
-
-    {
-        for (id, custom) in &puccinia.custom {
-            context.custom.push(Account {
-                id: id.to_string(),
-                name: custom.name().to_string(),
-                kind: "custom".to_string()
-            });
-        }
+    for wallet in wallets {
+        context.wallets.push(wallet);
     }
 
     Template::render("index", &context)

@@ -25,6 +25,7 @@ pub struct BankPosition {
     pub name: String,
     pub units: d128,
     pub price: d128,
+    pub value: d128,
 }
 
 pub struct BankTransaction {
@@ -54,13 +55,15 @@ pub trait Bank: Send + Sync {
             let mut positions = Vec::new();
             if let Some(balance) = response.balance {
                 if let Some(amount) = balance.amount {
+                    let value = d128::from_str(&amount).map_err(|_err| {
+                        format!("invalid decimal: {}", amount)
+                    })?;
                     positions.push(BankPosition {
                         id: "balance".to_string(),
                         name: "Balance".to_string(),
-                        units: d128::from_str(&amount).map_err(|_err| {
-                            format!("invalid decimal: {}", amount)
-                        })?,
-                        price: d128!(1)
+                        units: value,
+                        price: d128!(1),
+                        value: value,
                     });
                 }
             }
@@ -80,16 +83,21 @@ pub trait Bank: Send + Sync {
 
                     if let Some(units) = position.units {
                         if let Some(price) = position.unit_price {
-                            positions.push(BankPosition {
-                                id: ticker.unwrap_or(p_id),
-                                name: name.unwrap_or(String::new()),
-                                units: d128::from_str(&units).map_err(|()| {
-                                    format!("invalid decimal: {}", units)
-                                })?,
-                                price: d128::from_str(&price).map_err(|()| {
-                                    format!("invalid decimal: {}", price)
-                                })?,
-                            });
+                            if let Some(value) = position.market_value {
+                                positions.push(BankPosition {
+                                    id: ticker.unwrap_or(p_id),
+                                    name: name.unwrap_or(String::new()),
+                                    units: d128::from_str(&units).map_err(|()| {
+                                        format!("invalid decimal: {}", units)
+                                    })?,
+                                    price: d128::from_str(&price).map_err(|()| {
+                                        format!("invalid decimal: {}", price)
+                                    })?,
+                                    value: d128::from_str(&value).map_err(|()| {
+                                        format!("invalid decimal: {}", value)
+                                    })?,
+                                });
+                            }
                         }
                     }
                 }

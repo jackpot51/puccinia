@@ -9,42 +9,14 @@
     <body class="container">
         <h3>puccinia</h3>
 
-        {{#if bank}}
+        {{#if wallets}}
             <br/>
-            <h4>Banks</h4>
+            <h4>Wallets</h4>
             <table class="table table-bordered table-hover table-sm">
                 <tbody>
-                    {{#each bank}}
+                    {{#each wallets}}
                         <tr>
-                            <td><a href="/bank/{{id}}">{{name}}</a></td>
-                        </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        {{/if}}
-
-        {{#if crypto}}
-            <br/>
-            <h4>Crypto</h4>
-            <table class="table table-bordered table-hover table-sm">
-                <tbody>
-                    {{#each crypto}}
-                        <tr>
-                            <td><a href="/crypto/{{id}}">{{name}}</a></td>
-                        </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        {{/if}}
-
-        {{#if custom}}
-            <br/>
-            <h4>Custom</h4>
-            <table class="table table-bordered table-hover table-sm">
-                <tbody>
-                    {{#each custom}}
-                        <tr>
-                            <td><a href="/custom/{{id}}">{{name}}</a></td>
+                            <td><a href="/wallet/{{id}}">{{name}}</a></td>
                         </tr>
                     {{/each}}
                 </tbody>

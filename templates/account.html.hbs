@@ -7,17 +7,7 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
     </head>
     <body class="container">
-        <h3><a href="/">puccinia</a> &gt; <a href="/bank/{{bank_id}}">{{bank_name}}</a> &gt; {{kind}}_{{id}}</h3>
-
-        <br/>
-        <table class="table table-bordered table-hover table-sm">
-            <tbody>
-                <tr>
-                    <th>Balance</th>
-                    <td align="right">{{amount}}</td>
-                </tr>
-            </tbody>
-        </table>
+        <h3><a href="/">puccinia</a> &gt; <a href="/wallet/{{wallet.id}}">{{wallet.name}}</a> &gt; {{account.name}}</h3>
 
         {{#if positions}}
             <br/>
@@ -28,18 +18,18 @@
                         <th>Ticker</th>
                         <th>Name</th>
                         <th>Units</th>
-                        <th>Unit Price</th>
-                        <th>Market Value</th>
+                        <th>Price</th>
+                        <th>Value</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each positions}}
                         <tr>
-                            <td>{{ticker}}</td>
+                            <td>{{id}}</td>
                             <td>{{name}}</td>
                             <td align="right">{{units}}</td>
-                            <td align="right">{{unit_price}}</td>
-                            <td align="right">{{market_value}}</td>
+                            <td align="right">{{price}}</td>
+                            <td align="right">{{value}}</td>
                         </tr>
                     {{/each}}
                 </tbody>
@@ -54,7 +44,6 @@
                     <tr>
                         <th>Time</th>
                         <th>Name</th>
-                        <th>Kind</th>
                         <th>Amount</th>
                     </tr>
                 </thead>
@@ -63,7 +52,6 @@
                         <tr>
                             <td>{{time}}</td>
                             <td>{{name}}</td>
-                            <td>{{kind}}</td>
                             <td align="right">{{amount}}</td>
                         </tr>
                     {{/each}}

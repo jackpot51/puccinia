@@ -14,6 +14,7 @@ table! {
         name -> Text,
         units -> Text,
         price -> Text,
+        value -> Text,
     }
 }
 

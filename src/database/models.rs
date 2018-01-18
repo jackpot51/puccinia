@@ -1,13 +1,13 @@
 use super::schema::{wallets, accounts, positions, transactions};
 
-#[derive(Insertable, Queryable)]
+#[derive(Insertable, Queryable, Serialize)]
 #[table_name = "wallets"]
 pub struct Wallet {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Insertable, Queryable)]
+#[derive(Insertable, Queryable, Serialize)]
 #[table_name = "accounts"]
 pub struct Account {
     pub wallet_id: String,
@@ -15,7 +15,7 @@ pub struct Account {
     pub name: String,
 }
 
-#[derive(Insertable, Queryable)]
+#[derive(Insertable, Queryable, Serialize)]
 #[table_name = "positions"]
 pub struct Position {
     pub wallet_id: String,
@@ -24,9 +24,10 @@ pub struct Position {
     pub name: String,
     pub units: String,
     pub price: String,
+    pub value: String,
 }
 
-#[derive(Insertable, Queryable)]
+#[derive(Insertable, Queryable, Serialize)]
 #[table_name = "transactions"]
 pub struct Transaction {
     pub wallet_id: String,

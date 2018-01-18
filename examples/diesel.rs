@@ -78,6 +78,7 @@ fn main() {
                             name: position.name,
                             units: format!("{}", position.units),
                             price: format!("{}", position.price),
+                            value: format!("{}", position.value),
                         })
                         .execute(&connection)
                         .unwrap();
@@ -114,6 +115,7 @@ fn main() {
     }
 
     let positions = positions::table
+        .order(positions::id.asc())
        .load::<Position>(&connection)
        .unwrap();
 
