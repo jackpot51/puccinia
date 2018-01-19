@@ -13,3 +13,35 @@ Puccinia can access the following sources of financial data:
   - Bitcoin exchange price using [coinnect](https://github.com/hugues31/coinnect)
   - Bitcoin address balances through [blockchain.info](https://blockchain.info/api)
 - Manual entry
+
+## Usage
+
+You must have libsqlite3 installed to use `puccinia`. On Ubuntu, you may install
+it with the following command:
+
+```
+sudo apt install libsqlite3-dev
+```
+
+Run the following commands to create the database.
+
+```
+cargo install diesel_cli --no-default-features --features sqlite
+diesel setup
+```
+
+Copy the `example.toml` to `secret.toml`, which is ignored by default. Modify
+this file to include your own accounts.
+
+Run `puccinia` with the path to your configuration to download your account
+information:
+
+```
+cargo run secret.toml
+```
+
+Run `puccinia` without a path to simply used the cached information:
+
+```
+cargo run
+```

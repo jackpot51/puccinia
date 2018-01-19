@@ -11,6 +11,7 @@ extern crate mime;
 extern crate rand;
 #[macro_use]
 extern crate serde_derive;
+extern crate toml;
 extern crate xml;
 
 use std::collections::BTreeMap;
@@ -23,6 +24,7 @@ pub mod bank;
 pub mod crypto;
 pub mod custom;
 pub mod database;
+pub mod import;
 pub mod ofx;
 
 pub struct Puccinia {
