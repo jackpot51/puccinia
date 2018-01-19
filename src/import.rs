@@ -119,9 +119,38 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                 .unwrap();
         }
 
-        // for (id, custom) in &puccinia.custom {
-        //     let amount = custom.amount();
-        //     balances.push((format!("custom_{}", id), amount));
-        // }
+        for (id, custom) in &puccinia.custom {
+            let name = custom.name();
+            diesel::insert_into(wallets::table)
+                .values(&Wallet {
+                    id: id.to_string(),
+                    name: name.to_string()
+                })
+                .execute(&connection)
+                .unwrap();
+
+            diesel::insert_into(accounts::table)
+                .values(&Account {
+                    wallet_id: id.to_string(),
+                    id: id.to_string(),
+                    name: name.to_string()
+                })
+                .execute(&connection)
+                .unwrap();
+
+            let amount = custom.amount();
+            diesel::insert_into(positions::table)
+                .values(&Position {
+                    wallet_id: id.to_string(),
+                    account_id: id.to_string(),
+                    id: id.to_string(),
+                    name: name.to_string(),
+                    units: format!("{}", amount),
+                    price: format!("{}", 1),
+                    value: format!("{}", amount),
+                })
+                .execute(&connection)
+                .unwrap();
+        }
     }
 }
