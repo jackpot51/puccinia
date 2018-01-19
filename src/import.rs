@@ -83,14 +83,42 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
             }
         }
 
-        // for (_id, crypto) in &puccinia.crypto {
-        //     let address = crypto.address();
-        //     let amount = crypto.amount().unwrap();
-        //     let rate = crypto.rate().unwrap();
-        //     println!("{}: {} @ {}", address, amount, rate);
-        //     balances.push((format!("{}_{}", crypto.kind(), address), amount * rate));
-        // }
-        //
+        for (id, crypto) in &puccinia.crypto {
+            diesel::insert_into(wallets::table)
+                .values(&Wallet {
+                    id: id.to_string(),
+                    name: crypto.name().to_string()
+                })
+                .execute(&connection)
+                .unwrap();
+
+            let kind = crypto.kind();
+            let address = crypto.address();
+            diesel::insert_into(accounts::table)
+                .values(&Account {
+                    wallet_id: id.to_string(),
+                    id: address.to_string(),
+                    name: format!("{}_{}", kind, address)
+                })
+                .execute(&connection)
+                .unwrap();
+
+            let amount = crypto.amount().unwrap();
+            let rate = crypto.rate().unwrap();
+            diesel::insert_into(positions::table)
+                .values(&Position {
+                    wallet_id: id.to_string(),
+                    account_id: address.to_string(),
+                    id: kind.to_string(),
+                    name: kind.to_string(),
+                    units: format!("{}", amount),
+                    price: format!("{}", rate),
+                    value: format!("{}", amount * rate),
+                })
+                .execute(&connection)
+                .unwrap();
+        }
+
         // for (id, custom) in &puccinia.custom {
         //     let amount = custom.amount();
         //     balances.push((format!("custom_{}", id), amount));
