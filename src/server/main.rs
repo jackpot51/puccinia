@@ -1,6 +1,7 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
+#[macro_use]
 extern crate decimal;
 extern crate diesel;
 extern crate puccinia;

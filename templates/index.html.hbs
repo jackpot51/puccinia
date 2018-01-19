@@ -9,6 +9,9 @@
     <body class="container">
         <h3>puccinia</h3>
 
+        <br/>
+        <h4>Total: {{total}}</h4>
+
         {{#if wallets}}
             <br/>
             <h4>Wallets</h4>
@@ -16,7 +19,8 @@
                 <tbody>
                     {{#each wallets}}
                         <tr>
-                            <td><a href="/wallet/{{id}}">{{name}}</a></td>
+                            <td><a href="/wallet/{{wallet.id}}">{{wallet.name}}</a></td>
+                            <td>{{total}}</td>
                         </tr>
                     {{/each}}
                 </tbody>
