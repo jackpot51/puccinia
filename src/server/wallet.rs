@@ -1,10 +1,10 @@
-use decimal::d128;
 use diesel::prelude::*;
 use puccinia::database::ConnectionMutex;
 use puccinia::database::models::{Wallet, Account, Position};
 use puccinia::database::schema::{wallets, accounts, positions};
 use rocket::State;
 use rocket_contrib::Template;
+use rust_decimal::Decimal;
 use std::str::FromStr;
 
 #[get("/wallet/<id>")]
@@ -14,13 +14,13 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
     #[derive(Serialize)]
     struct AccountContext {
         account: Account,
-        total: d128,
+        total: Decimal,
     }
 
     #[derive(Serialize)]
     struct Context {
         wallet: Wallet,
-        total: d128,
+        total: Decimal,
         accounts: Vec<AccountContext>,
     }
 
@@ -32,7 +32,7 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
 
     let mut context = Context {
         wallet: wallet,
-        total: d128!(0),
+        total: Decimal::new(0, 0),
         accounts: Vec::new(),
     };
 
@@ -43,7 +43,7 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
         .unwrap();
 
     for account in accounts {
-        let mut total = d128!(0);
+        let mut total = Decimal::new(0, 0);
 
         let positions = positions::table
             .filter(positions::wallet_id.eq(&id))
@@ -53,7 +53,7 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
             .unwrap();
 
         for position in positions {
-            if let Ok(value) = d128::from_str(&position.value) {
+            if let Ok(value) = Decimal::from_str(&position.value) {
                 context.total += value;
                 total += value;
             }

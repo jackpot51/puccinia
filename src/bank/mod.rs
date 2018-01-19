@@ -1,5 +1,5 @@
 use chrono::{Date, Utc};
-use decimal::d128;
+use rust_decimal::Decimal;
 use std::str::FromStr;
 
 use ofx::{Ofx, string_to_date};
@@ -23,16 +23,16 @@ pub struct BankAccount {
 pub struct BankPosition {
     pub id: String,
     pub name: String,
-    pub units: d128,
-    pub price: d128,
-    pub value: d128,
+    pub units: Decimal,
+    pub price: Decimal,
+    pub value: Decimal,
 }
 
 pub struct BankTransaction {
     pub id: String,
     pub name: String,
     pub time: Date<Utc>,
-    pub amount: d128,
+    pub amount: Decimal,
 }
 
 pub struct BankStatement {
@@ -55,14 +55,14 @@ pub trait Bank: Send + Sync {
             let mut positions = Vec::new();
             if let Some(balance) = response.balance {
                 if let Some(amount) = balance.amount {
-                    let value = d128::from_str(&amount).map_err(|_err| {
+                    let value = Decimal::from_str(&amount).map_err(|_err| {
                         format!("invalid decimal: {}", amount)
                     })?;
                     positions.push(BankPosition {
                         id: "balance".to_string(),
                         name: "Balance".to_string(),
                         units: value,
-                        price: d128!(1),
+                        price: Decimal::new(1, 0),
                         value: value,
                     });
                 }
@@ -87,14 +87,14 @@ pub trait Bank: Send + Sync {
                                 positions.push(BankPosition {
                                     id: ticker.unwrap_or(p_id),
                                     name: name.unwrap_or(String::new()),
-                                    units: d128::from_str(&units).map_err(|()| {
-                                        format!("invalid decimal: {}", units)
+                                    units: Decimal::from_str(&units).map_err(|err| {
+                                        format!("invalid decimal: {}: {}", units, err)
                                     })?,
-                                    price: d128::from_str(&price).map_err(|()| {
-                                        format!("invalid decimal: {}", price)
+                                    price: Decimal::from_str(&price).map_err(|err| {
+                                        format!("invalid decimal: {}: {}", price, err)
                                     })?,
-                                    value: d128::from_str(&value).map_err(|()| {
-                                        format!("invalid decimal: {}", value)
+                                    value: Decimal::from_str(&value).map_err(|err| {
+                                        format!("invalid decimal: {}: {}", value, err)
                                     })?,
                                 });
                             }
@@ -114,8 +114,8 @@ pub trait Bank: Send + Sync {
                                 time: string_to_date(&time).map_err(|err| {
                                     format!("invalid date: {}: {}", time, err)
                                 })?,
-                                amount: d128::from_str(&amount).map_err(|()| {
-                                    format!("invalid decimal: {}", amount)
+                                amount: Decimal::from_str(&amount).map_err(|err| {
+                                    format!("invalid decimal: {}: {}", amount, err)
                                 })?,
                             });
                         }

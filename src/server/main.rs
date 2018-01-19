@@ -1,12 +1,11 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-#[macro_use]
-extern crate decimal;
 extern crate diesel;
 extern crate puccinia;
 extern crate rocket;
 extern crate rocket_contrib;
+extern crate rust_decimal;
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;

@@ -1,9 +1,9 @@
-use decimal::d128;
+use rust_decimal::Decimal;
 use std::str::FromStr;
 
 pub struct Custom {
     name: String,
-    amount: d128,
+    amount: Decimal,
 }
 
 impl Custom {
@@ -11,7 +11,7 @@ impl Custom {
         &self.name
     }
 
-    pub fn amount(&self) -> d128 {
+    pub fn amount(&self) -> Decimal {
         self.amount
     }
 }
@@ -24,7 +24,7 @@ pub struct CustomConfig {
 
 impl CustomConfig {
     pub fn build(self) -> Result<Custom, String> {
-        let amount = d128::from_str(&self.amount).map_err(|_err| {
+        let amount = Decimal::from_str(&self.amount).map_err(|_err| {
             format!("invalid decimal: {}", self.amount)
         })?;
 

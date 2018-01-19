@@ -2,7 +2,7 @@ use coinnect::coinnect::Coinnect;
 use coinnect::gdax::GdaxCreds;
 use coinnect::exchange::Exchange::Gdax;
 use coinnect::types::Pair::BTC_USD;
-use decimal::d128;
+use rust_decimal::Decimal;
 use std::str::FromStr;
 
 use crypto::Crypto;
@@ -38,18 +38,18 @@ impl Crypto for Bitcoin {
         &self.address
     }
 
-    fn amount(&self) -> Result<d128, String> {
+    fn amount(&self) -> Result<Decimal, String> {
         let api = BlockchainInfoApi;
         let response = api.address_balance(&self.address)?;
 
-        let satoshi = d128::from_str(&response).map_err(|_err| {
+        let satoshi = Decimal::from_str(&response).map_err(|_err| {
             format!("invalid decimal: {}", response)
         })?;
 
-        Ok(satoshi/d128!(100000000))
+        Ok(satoshi/Decimal::new(100000000, 0))
     }
 
-    fn rate(&self) -> Result<d128, String> {
+    fn rate(&self) -> Result<Decimal, String> {
         let creds = GdaxCreds::new("", "", "", "");
 
         let mut api = Coinnect::new(Gdax, creds).map_err(|err| {
@@ -61,7 +61,7 @@ impl Crypto for Bitcoin {
         })?;
 
         let string = format!("{}", ticker.last_trade_price);
-        d128::from_str(&string).map_err(|_err| {
+        Decimal::from_str(&string).map_err(|_err| {
             format!("invalid decimal: {}", string)
         })
     }

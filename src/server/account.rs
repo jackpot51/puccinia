@@ -1,10 +1,10 @@
-use decimal::d128;
 use diesel::prelude::*;
 use puccinia::database::ConnectionMutex;
 use puccinia::database::models::{Wallet, Account, Position, Transaction};
 use puccinia::database::schema::{wallets, accounts, positions, transactions};
 use rocket::State;
 use rocket_contrib::Template;
+use rust_decimal::Decimal;
 use std::str::FromStr;
 
 #[get("/account/<wallet_id>/<id>")]
@@ -15,7 +15,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     struct Context {
         wallet: Wallet,
         account: Account,
-        total: d128,
+        total: Decimal,
         positions: Vec<Position>,
         transactions: Vec<Transaction>,
     }
@@ -33,7 +33,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     let mut context = Context {
         wallet: wallet,
         account: account,
-        total: d128!(0),
+        total: Decimal::new(0, 0),
         positions: Vec::new(),
         transactions: Vec::new()
     };
@@ -46,7 +46,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         .unwrap();
 
     for position in positions {
-        if let Ok(value) = d128::from_str(&position.value) {
+        if let Ok(value) = Decimal::from_str(&position.value) {
             context.total += value;
         }
         context.positions.push(position);

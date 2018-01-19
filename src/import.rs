@@ -92,17 +92,17 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                 .execute(&connection)
                 .unwrap();
 
-            let kind = crypto.kind();
             let address = crypto.address();
             diesel::insert_into(accounts::table)
                 .values(&Account {
                     wallet_id: id.to_string(),
                     id: address.to_string(),
-                    name: format!("{}_{}", kind, address)
+                    name: format!("{}", address)
                 })
                 .execute(&connection)
                 .unwrap();
 
+            let kind = crypto.kind();
             let amount = crypto.amount().unwrap();
             let rate = crypto.rate().unwrap();
             diesel::insert_into(positions::table)

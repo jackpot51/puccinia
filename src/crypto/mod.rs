@@ -1,4 +1,4 @@
-use decimal::d128;
+use rust_decimal::Decimal;
 
 pub use self::bitcoin::Bitcoin;
 
@@ -8,8 +8,8 @@ pub trait Crypto: Send + Sync {
     fn kind(&self) -> &str;
     fn name(&self) -> &str;
     fn address(&self) -> &str;
-    fn amount(&self) -> Result<d128, String>;
-    fn rate(&self) -> Result<d128, String>;
+    fn amount(&self) -> Result<Decimal, String>;
+    fn rate(&self) -> Result<Decimal, String>;
 }
 
 #[derive(Deserialize, Serialize)]
