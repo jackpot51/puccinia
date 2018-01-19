@@ -55,8 +55,8 @@ pub trait Bank: Send + Sync {
             let mut positions = Vec::new();
             if let Some(balance) = response.balance {
                 if let Some(amount) = balance.amount {
-                    let value = Decimal::from_str(&amount).map_err(|_err| {
-                        format!("invalid decimal: {}", amount)
+                    let value = Decimal::from_str(&amount).map_err(|err| {
+                        format!("invalid decimal: {}: {}", amount, err)
                     })?;
                     positions.push(BankPosition {
                         id: "balance".to_string(),
@@ -89,13 +89,13 @@ pub trait Bank: Send + Sync {
                                     name: name.unwrap_or(String::new()),
                                     units: Decimal::from_str(&units).map_err(|err| {
                                         format!("invalid decimal: {}: {}", units, err)
-                                    })?,
+                                    })?.normalize(),
                                     price: Decimal::from_str(&price).map_err(|err| {
                                         format!("invalid decimal: {}: {}", price, err)
-                                    })?,
+                                    })?.normalize(),
                                     value: Decimal::from_str(&value).map_err(|err| {
                                         format!("invalid decimal: {}: {}", value, err)
-                                    })?,
+                                    })?.normalize(),
                                 });
                             }
                         }
@@ -116,7 +116,7 @@ pub trait Bank: Send + Sync {
                                 })?,
                                 amount: Decimal::from_str(&amount).map_err(|err| {
                                     format!("invalid decimal: {}: {}", amount, err)
-                                })?,
+                                })?.normalize(),
                             });
                         }
                     }

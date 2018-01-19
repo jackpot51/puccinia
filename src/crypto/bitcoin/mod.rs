@@ -42,11 +42,12 @@ impl Crypto for Bitcoin {
         let api = BlockchainInfoApi;
         let response = api.address_balance(&self.address)?;
 
-        let satoshi = Decimal::from_str(&response).map_err(|_err| {
-            format!("invalid decimal: {}", response)
-        })?;
+        let satoshi = Decimal::from_str(&response).map_err(|err| {
+            format!("invalid decimal: {}: {}", response, err)
+        })?.normalize();
 
-        Ok(satoshi/Decimal::new(100000000, 0))
+        let amount = (satoshi/Decimal::new(100000000, 0)).normalize();
+        Ok(amount)
     }
 
     fn rate(&self) -> Result<Decimal, String> {
@@ -61,8 +62,9 @@ impl Crypto for Bitcoin {
         })?;
 
         let string = format!("{}", ticker.last_trade_price);
-        Decimal::from_str(&string).map_err(|_err| {
-            format!("invalid decimal: {}", string)
-        })
+        let rate = Decimal::from_str(&string).map_err(|err| {
+            format!("invalid decimal: {}: {}", string, err)
+        })?.normalize();
+        Ok(rate)
     }
 }

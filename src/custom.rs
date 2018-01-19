@@ -24,13 +24,13 @@ pub struct CustomConfig {
 
 impl CustomConfig {
     pub fn build(self) -> Result<Custom, String> {
-        let amount = Decimal::from_str(&self.amount).map_err(|_err| {
-            format!("invalid decimal: {}", self.amount)
-        })?;
+        let amount = Decimal::from_str(&self.amount).map_err(|err| {
+            format!("invalid decimal: {}: {}", self.amount, err)
+        })?.normalize();
 
         Ok(Custom {
             name: self.name,
-            amount: amount
+            amount: amount,
         })
     }
 }
