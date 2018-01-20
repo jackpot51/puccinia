@@ -50,7 +50,9 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     .execute(&connection)
                     .unwrap();
 
-                let statement = bank.statement(&account, Utc.ymd(2017, 12, 1), Utc::today()).unwrap();
+                let start = Utc.ymd(2017, 1, 1);
+                let end = Utc::today();
+                let statement = bank.statement(&account, Some(start), Some(end)).unwrap();
 
                 for position in statement.positions {
                     diesel::insert_into(positions::table)

@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 #[get("/account/<wallet_id>/<id>")]
 pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: String) -> Result<Template, String> {
-    let connection = connection_mutex.lock();
+    let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
 
     #[derive(Serialize)]
     struct Context {
@@ -23,12 +23,12 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     let wallet = wallets::table
         .find(&wallet_id)
         .first::<Wallet>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
     let account = accounts::table
         .find((&wallet_id, &id))
         .first::<Account>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
     let mut context = Context {
         wallet: wallet,
@@ -43,7 +43,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         .filter(positions::account_id.eq(&id))
         .order(positions::id.asc())
         .load::<Position>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
     for position in positions {
         if let Ok(value) = Decimal::from_str(&position.value) {
@@ -57,7 +57,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         .filter(transactions::account_id.eq(&id))
         .order(transactions::time.asc())
         .load::<Transaction>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
     for transaction in transactions {
         context.transactions.push(transaction);

@@ -48,9 +48,9 @@ pub trait Bank: Send + Sync {
 
     fn accounts(&self) -> Result<Vec<BankAccount>, String>;
 
-    fn statement(&self, account: &BankAccount, start: Date<Utc>, end: Date<Utc>) -> Result<BankStatement, String> {
+    fn statement(&self, account: &BankAccount, start: Option<Date<Utc>>, end: Option<Date<Utc>>) -> Result<BankStatement, String> {
         if let Some(ofx) = self.as_ofx() {
-            let response = ofx.ofx(&account.id, &account.kind, Some(start), Some(end))?;
+            let response = ofx.ofx(&account.id, &account.kind, start, end)?;
 
             let mut positions = Vec::new();
             if let Some(balance) = response.balance {

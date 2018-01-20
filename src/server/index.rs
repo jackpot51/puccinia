@@ -8,8 +8,8 @@ use rust_decimal::Decimal;
 use std::str::FromStr;
 
 #[get("/")]
-pub fn index(connection_mutex: State<ConnectionMutex>) -> Template {
-    let connection = connection_mutex.lock();
+pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, String> {
+    let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
 
     #[derive(Serialize)]
     struct WalletContext {
@@ -31,7 +31,7 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Template {
     let wallets = wallets::table
         .order(wallets::id.asc())
         .load::<Wallet>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
     for wallet in wallets {
         let mut total = Decimal::new(0, 0);
@@ -40,7 +40,7 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Template {
             .filter(accounts::wallet_id.eq(&wallet.id))
             .order(accounts::id.asc())
             .load::<Account>(&*connection)
-            .unwrap();
+            .map_err(|err| format!("{}", err))?;
 
         for account in accounts {
             let positions = positions::table
@@ -48,7 +48,7 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Template {
                 .filter(positions::account_id.eq(&account.id))
                 .order(positions::id.asc())
                 .load::<Position>(&*connection)
-                .unwrap();
+                .map_err(|err| format!("{}", err))?;
 
             for position in positions {
                 if let Ok(value) = Decimal::from_str(&position.value) {
@@ -64,5 +64,5 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Template {
         });
     }
 
-    Template::render("index", &context)
+    Ok(Template::render("index", &context))
 }

@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 #[get("/wallet/<id>")]
 pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Template, String> {
-    let connection = connection_mutex.lock();
+    let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
 
     #[derive(Serialize)]
     struct AccountContext {
@@ -27,7 +27,7 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
     let wallet = wallets::table
         .find(&id)
         .first::<Wallet>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
 
     let mut context = Context {
@@ -40,7 +40,7 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
         .filter(accounts::wallet_id.eq(&id))
         .order(accounts::id.asc())
         .load::<Account>(&*connection)
-        .unwrap();
+        .map_err(|err| format!("{}", err))?;
 
     for account in accounts {
         let mut total = Decimal::new(0, 0);
@@ -50,7 +50,7 @@ pub fn wallet(connection_mutex: State<ConnectionMutex>, id: String) -> Result<Te
             .filter(positions::account_id.eq(&account.id))
             .order(positions::id.asc())
             .load::<Position>(&*connection)
-            .unwrap();
+            .map_err(|err| format!("{}", err))?;
 
         for position in positions {
             if let Ok(value) = Decimal::from_str(&position.value) {
