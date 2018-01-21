@@ -61,7 +61,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     let transactions = transactions::table
         .filter(transactions::wallet_id.eq(&wallet_id))
         .filter(transactions::account_id.eq(&id))
-        .order(transactions::time.desc())
+        .order((transactions::time.desc(), transactions::id.desc()))
         .load::<Transaction>(&*connection)
         .map_err(|err| format!("{}", err))?;
 

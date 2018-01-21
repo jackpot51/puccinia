@@ -11,21 +11,29 @@ use database::schema::{wallets, accounts, positions, transactions};
 pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
     let connection = establish_connection();
 
+    // In the future, a `stale` boolean could identify which rows to delete in a safer manner
+
+    // Deleted to ensure that only current wallets are listed
     diesel::delete(wallets::table)
         .execute(&connection)
         .unwrap();
 
+    // Deleted to ensure that only current accounts are listed
     diesel::delete(accounts::table)
         .execute(&connection)
         .unwrap();
 
+    // Deleted to ensure that only current positions are listed
     diesel::delete(positions::table)
         .execute(&connection)
         .unwrap();
 
-    diesel::delete(transactions::table)
-        .execute(&connection)
-        .unwrap();
+    // Not deleted because we update transactions in a streaming method, meaning that
+    // we may only receive 90 days of transactions but want to keep as many as we have
+    // in history
+    // diesel::delete(transactions::table)
+    //     .execute(&connection)
+    //     .unwrap();
 
     for config_toml in config_tomls {
         let config: Config = toml::from_str(config_toml.as_ref()).unwrap();
@@ -70,7 +78,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                 }
 
                 for transaction in statement.transactions {
-                    diesel::insert_into(transactions::table)
+                    diesel::replace_into(transactions::table)
                         .values(&Transaction {
                             wallet_id: id.to_string(),
                             account_id: account.id.clone(),
