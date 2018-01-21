@@ -48,14 +48,16 @@
                         <th>Time</th>
                         <th>Name</th>
                         <th>Amount</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each transactions}}
                         <tr>
-                            <td>{{time}}</td>
-                            <td>{{name}}</td>
-                            <td align="right">{{amount}}</td>
+                            <td>{{transaction.time}}</td>
+                            <td>{{transaction.name}}</td>
+                            <td align="right">{{transaction.amount}}</td>
+                            <td align="right">{{total}}</td>
                         </tr>
                     {{/each}}
                 </tbody>

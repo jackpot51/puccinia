@@ -12,12 +12,18 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
 
     #[derive(Serialize)]
+    struct TransactionContext {
+        transaction: Transaction,
+        total: Decimal,
+    }
+
+    #[derive(Serialize)]
     struct Context {
         wallet: Wallet,
         account: Account,
         total: Decimal,
         positions: Vec<Position>,
-        transactions: Vec<Transaction>,
+        transactions: Vec<TransactionContext>,
     }
 
     let wallet = wallets::table
@@ -55,12 +61,21 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     let transactions = transactions::table
         .filter(transactions::wallet_id.eq(&wallet_id))
         .filter(transactions::account_id.eq(&id))
-        .order(transactions::time.asc())
+        .order(transactions::time.desc())
         .load::<Transaction>(&*connection)
         .map_err(|err| format!("{}", err))?;
 
+    let mut current = context.total;
     for transaction in transactions {
-        context.transactions.push(transaction);
+        let mut next = current;
+        if let Ok(value) = Decimal::from_str(&transaction.amount) {
+            next -= value;
+        }
+        context.transactions.push(TransactionContext {
+            transaction: transaction,
+            total: current,
+        });
+        current = next;
     }
 
     Ok(Template::render("account", &context))
