@@ -22,6 +22,8 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         wallet: Wallet,
         account: Account,
         total: Decimal,
+        input: Decimal,
+        output: Decimal,
         positions: Vec<Position>,
         transactions: Vec<TransactionContext>,
     }
@@ -40,6 +42,8 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         wallet: wallet,
         account: account,
         total: Decimal::new(0, 0),
+        input: Decimal::new(0, 0),
+        output: Decimal::new(0, 0),
         positions: Vec::new(),
         transactions: Vec::new()
     };
@@ -70,6 +74,12 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         let mut next = current;
         if let Ok(value) = Decimal::from_str(&transaction.amount) {
             next -= value;
+            if value.is_sign_positive() {
+                context.input += value;
+            }
+            if value.is_sign_negative() {
+                context.output += value;
+            }
         }
         context.transactions.push(TransactionContext {
             transaction: transaction,

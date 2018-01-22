@@ -19,6 +19,7 @@ use std::io::Read;
 
 mod account;
 mod index;
+mod transaction;
 mod wallet;
 
 fn main() {
@@ -39,6 +40,7 @@ fn main() {
             index::index,
             wallet::wallet,
             account::account,
+            transaction::transaction,
         ])
         .attach(Template::fairing())
         .manage(ConnectionMutex::new())

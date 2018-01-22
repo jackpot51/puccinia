@@ -7,45 +7,20 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
     </head>
     <body class="container">
-        <h3><a href="/">puccinia</a> &gt; <a href="/wallet/{{wallet.id}}">{{wallet.name}}</a> &gt; {{account.name}}</h3>
-
-        {{#if positions}}
-            <br/>
-            <h4>Positions</h4>
-            <h5>Total: {{total}}</h5>
-            <table class="table table-bordered table-hover table-sm">
-                <thead>
-                    <tr>
-                        <th>Ticker</th>
-                        <th>Name</th>
-                        <th>Units</th>
-                        <th>Price</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each positions}}
-                        <tr>
-                            <td>{{id}}</td>
-                            <td>{{name}}</td>
-                            <td align="right">{{units}}</td>
-                            <td align="right">{{price}}</td>
-                            <td align="right">{{value}}</td>
-                        </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        {{/if}}
+        <h3><a href="/">puccinia</a> &gt; Transaction</h3>
 
         {{#if transactions}}
             <br/>
             <h4>Transactions</h4>
+            <h5>Total: {{total}}</h5>
             <h5>Input: {{input}}</h5>
             <h5>Output: {{output}}</h5>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>
                         <th>Time</th>
+                        <th>Wallet</th>
+                        <th>Account</th>
                         <th>Name</th>
                         <th>Amount</th>
                         <th>Total</th>
@@ -55,6 +30,8 @@
                     {{#each transactions}}
                         <tr>
                             <td><a href="/transaction/time/{{transaction.time}}">{{transaction.time}}</a></td>
+                            <td><a href="/wallet/{{transaction.wallet_id}}">{{transaction.wallet_id}}</a></td>
+                            <td><a href="/account/{{transaction.wallet_id}}/{{transaction.account_id}}">{{transaction.account_id}}</a></td>
                             <td><a href="/transaction/name/{{transaction.name}}">{{transaction.name}}</a></td>
                             <td align="right">{{transaction.amount}}</td>
                             <td align="right">{{total}}</td>
