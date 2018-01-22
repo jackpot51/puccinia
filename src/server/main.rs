@@ -40,6 +40,7 @@ fn main() {
             index::index,
             wallet::wallet,
             account::account,
+            transaction::transaction_all,
             transaction::transaction,
         ])
         .attach(Template::fairing())

@@ -7,6 +7,12 @@ use rocket_contrib::Template;
 use rust_decimal::Decimal;
 use std::str::FromStr;
 
+#[get("/transaction")]
+pub fn transaction_all(connection_mutex: State<ConnectionMutex>) -> Result<Template, String> {
+    transaction(connection_mutex, String::new(), String::new())
+}
+
+
 #[get("/transaction/<key>/<value>")]
 pub fn transaction(connection_mutex: State<ConnectionMutex>, key: String, value: String) -> Result<Template, String> {
     let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
@@ -25,14 +31,13 @@ pub fn transaction(connection_mutex: State<ConnectionMutex>, key: String, value:
         transactions: Vec<TransactionContext>,
     }
 
-    let mut context = Context {
-        total: Decimal::new(0, 0),
-        input: Decimal::new(0, 0),
-        output: Decimal::new(0, 0),
-        transactions: Vec::new()
-    };
-
     let transactions = match key.as_str() {
+        "" => {
+            transactions::table
+                .order((transactions::time.desc(), transactions::id.desc()))
+                .load::<Transaction>(&*connection)
+                .map_err(|err| format!("{}", err))?
+        },
         "time" => {
             transactions::table
                 .filter(transactions::time.eq(&value))
@@ -48,6 +53,13 @@ pub fn transaction(connection_mutex: State<ConnectionMutex>, key: String, value:
                 .map_err(|err| format!("{}", err))?
         },
         _ => return Err(format!("Unknown key '{}'", key))
+    };
+
+    let mut context = Context {
+        total: Decimal::new(0, 0),
+        input: Decimal::new(0, 0),
+        output: Decimal::new(0, 0),
+        transactions: Vec::new()
     };
 
     for transaction in transactions.iter() {
