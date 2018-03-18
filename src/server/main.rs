@@ -13,14 +13,22 @@ extern crate toml;
 use puccinia::database::ConnectionMutex;
 use puccinia::import::import;
 use rocket_contrib::Template;
+use rocket::response::NamedFile;
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use std::path::{Path, PathBuf};
 
 mod account;
 mod index;
+mod json;
 mod transaction;
 mod wallet;
+
+#[get("/static/<file..>")]
+fn static_files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static").join(file)).ok()
+}
 
 fn main() {
     let mut config_tomls = Vec::new();
@@ -42,6 +50,8 @@ fn main() {
             account::account,
             transaction::transaction_all,
             transaction::transaction,
+            json::json,
+            static_files,
         ])
         .attach(Template::fairing())
         .manage(ConnectionMutex::new())

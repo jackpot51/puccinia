@@ -1,0 +1,44 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js" integrity="sha256-N4u5BjTLNwmGul6RgLoESPNqDFVUibVuOYhP4gJgrew=" crossorigin="anonymous"></script>
+<canvas id="myChart" width="400" height="400"></canvas>
+<script>
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        var dump = JSON.parse(this.responseText);
+        var transactions = dump.transactions;
+        var data = [];
+        for (var i = 0; i < transactions.length; i++) {
+            var transaction = transactions[i];
+            data.push({
+                x: new Date(transaction.time),
+                y: parseFloat(transaction.amount)
+            });
+        }
+        console.log(data);
+        chart(data);
+    }
+};
+xhttp.open("GET", "/json", true);
+xhttp.send();
+
+function chart(data) {
+    var ctx = document.getElementById("myChart").getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Scatter Dataset',
+                data: data
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom'
+                }]
+            }
+        }
+    });
+}
+</script>
