@@ -5,16 +5,41 @@ use std::str::FromStr;
 use ofx::{Ofx, string_to_date};
 
 pub use self::amex::Amex;
+pub use self::fidelity::Fidelity;
 pub use self::tangerine::Tangerine;
 pub use self::usaa::Usaa;
 pub use self::usaa_inv::UsaaInv;
 pub use self::vanguard::Vanguard;
 
 mod amex;
+mod fidelity;
 mod tangerine;
 mod usaa;
 mod usaa_inv;
 mod vanguard;
+
+#[derive(Deserialize, Serialize)]
+pub struct BankConfig {
+    pub kind: String,
+    pub name: String,
+    pub username: String,
+    pub password: String,
+    pub accounts: Option<Vec<BankAccount>>,
+}
+
+impl BankConfig {
+    pub fn build(self) -> Result<Box<Bank>, String> {
+        match self.kind.as_str() {
+            "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
+            "fidelity" => Ok(Box::new(Fidelity::new(self.name, self.username, self.password, self.accounts))),
+            "tangerine" => Ok(Box::new(Tangerine::new(self.name, self.username, self.password, self.accounts))),
+            "usaa" => Ok(Box::new(Usaa::new(self.name, self.username, self.password, self.accounts))),
+            "usaa_inv" => Ok(Box::new(UsaaInv::new(self.name, self.username, self.password, self.accounts))),
+            "vanguard" => Ok(Box::new(Vanguard::new(self.name, self.username, self.password, self.accounts))),
+            other => Err(format!("Unknown bank kind: {}", other))
+        }
+    }
+}
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct BankAccount {
@@ -131,28 +156,6 @@ pub trait Bank: Send + Sync {
             })
         } else {
             Err(format!("Bank::transactions not implemented for {}", self.kind()))
-        }
-    }
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct BankConfig {
-    pub kind: String,
-    pub name: String,
-    pub username: String,
-    pub password: String,
-    pub accounts: Option<Vec<BankAccount>>,
-}
-
-impl BankConfig {
-    pub fn build(self) -> Result<Box<Bank>, String> {
-        match self.kind.as_str() {
-            "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
-            "tangerine" => Ok(Box::new(Tangerine::new(self.name, self.username, self.password, self.accounts))),
-            "usaa" => Ok(Box::new(Usaa::new(self.name, self.username, self.password, self.accounts))),
-            "usaa_inv" => Ok(Box::new(UsaaInv::new(self.name, self.username, self.password, self.accounts))),
-            "vanguard" => Ok(Box::new(Vanguard::new(self.name, self.username, self.password, self.accounts))),
-            other => Err(format!("Unknown bank kind: {}", other))
         }
     }
 }
