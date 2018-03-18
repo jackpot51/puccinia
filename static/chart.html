@@ -1,43 +1,100 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js" integrity="sha256-N4u5BjTLNwmGul6RgLoESPNqDFVUibVuOYhP4gJgrew=" crossorigin="anonymous"></script>
-<canvas id="myChart" width="400" height="400"></canvas>
+<canvas id="scatter" width="400" height="400"></canvas>
+<canvas id="line" width="400" height="400"></canvas>
 <script>
 var xhttp = new XMLHttpRequest();
 xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-        var dump = JSON.parse(this.responseText);
-        var transactions = dump.transactions;
+        var response = JSON.parse(this.responseText);
+
+        var wallets = response.wallets;
+        var accounts = response.accounts;
+        var transactions = response.transactions;
+
+        console.log(wallets);
+        console.log(accounts);
+
         var data = [];
+        var integral = [];
+        var total = 0.0;
         for (var i = 0; i < transactions.length; i++) {
             var transaction = transactions[i];
+            var account = accounts.find(function(account) {
+                return account.id == transaction.account_id;
+            });
+            var wallet = wallets.find(function(wallet) {
+                return wallet.id == transaction.wallet_id;
+            });
+
             data.push({
                 x: new Date(transaction.time),
-                y: parseFloat(transaction.amount)
+                y: parseFloat(transaction.amount),
+                wallet: wallet,
+                account: account,
+                transaction: transaction
+            });
+
+            total += parseFloat(transaction.amount);
+            integral.push({
+                x: new Date(transaction.time),
+                y: total,
+                wallet: wallet,
+                account: account,
+                transaction: transaction
             });
         }
-        console.log(data);
-        chart(data);
+
+        chart(document.getElementById("scatter"), 'scatter', 'Transactions', data);
+
+        chart(document.getElementById("line"), 'line', 'Total', integral);
     }
 };
 xhttp.open("GET", "/json", true);
 xhttp.send();
 
-function chart(data) {
-    var ctx = document.getElementById("myChart").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'scatter',
+function chart(element, type, title, data) {
+    var context = element.getContext('2d');
+    var chart = new Chart(context, {
+        type: type,
         data: {
             datasets: [{
-                label: 'Scatter Dataset',
+                label: title,
                 data: data
             }]
         },
         options: {
+            responsive: true,
             scales: {
                 xAxes: [{
-                    type: 'linear',
-                    position: 'bottom'
+                    type: 'time',
+                    display: true,
+                    scaleLabel: {
+						display: true,
+						labelString: 'Date'
+					}
                 }]
-            }
+            },
+            tooltips: {
+				mode: 'index',
+				callbacks: {
+                    beforeLabel: function(tooltipItem, data) {
+                        var item = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        console.log(item);
+                        return item.wallet.name + " > " + item.account.name;
+					},
+					label: function(tooltipItem, data) {
+                        var item = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        console.log(item);
+                        return item.transaction.name;
+					},
+                    afterLabel: function(tooltipItem, data) {
+                        var item = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        console.log(item);
+                        return item.transaction.time + ": " + item.y;
+					}
+				},
+				footerFontStyle: 'normal'
+			}
         }
     });
 }
