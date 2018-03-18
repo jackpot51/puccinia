@@ -7,11 +7,13 @@ use ofx::{Ofx, string_to_date};
 pub use self::amex::Amex;
 pub use self::tangerine::Tangerine;
 pub use self::usaa::Usaa;
+pub use self::usaa_inv::UsaaInv;
 pub use self::vanguard::Vanguard;
 
 mod amex;
 mod tangerine;
 mod usaa;
+mod usaa_inv;
 mod vanguard;
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -148,6 +150,7 @@ impl BankConfig {
             "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
             "tangerine" => Ok(Box::new(Tangerine::new(self.name, self.username, self.password, self.accounts))),
             "usaa" => Ok(Box::new(Usaa::new(self.name, self.username, self.password, self.accounts))),
+            "usaa_inv" => Ok(Box::new(UsaaInv::new(self.name, self.username, self.password, self.accounts))),
             "vanguard" => Ok(Box::new(Vanguard::new(self.name, self.username, self.password, self.accounts))),
             other => Err(format!("Unknown bank kind: {}", other))
         }
