@@ -75,23 +75,25 @@ function generate(response, start_date, end_date) {
         });
 
         var date = new Date(transaction.time);
-        var amount = parseFloat(transaction.amount);
-        data.push({
-            x: date,
-            y: amount,
-            wallet: wallet,
-            account: account,
-            transaction: transaction
-        });
+        if ((!start_date || date >= new Date(start_date)) && (!end_date || date <= new Date(end_date))) {
+            var amount = parseFloat(transaction.amount);
+            data.push({
+                x: date,
+                y: amount,
+                wallet: wallet,
+                account: account,
+                transaction: transaction
+            });
 
-        total += amount;
-        integral.push({
-            x: date,
-            y: total,
-            wallet: wallet,
-            account: account,
-            transaction: transaction
-        });
+            total += amount;
+            integral.push({
+                x: date,
+                y: total,
+                wallet: wallet,
+                account: account,
+                transaction: transaction
+            });
+        }
     }
 
     chart(document.getElementById("scatter"), 'scatter', 'Transactions', data);
