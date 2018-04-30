@@ -83,10 +83,14 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         }
         context.transactions.push(TransactionContext {
             transaction: transaction,
-            total: current,
+            total: current.round_dp(2),
         });
         current = next;
     }
+
+    context.total = context.total.round_dp(2);
+    context.input = context.input.round_dp(2);
+    context.output = context.output.round_dp(2);
 
     Ok(Template::render("account", &context))
 }

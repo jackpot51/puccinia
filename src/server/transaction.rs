@@ -82,10 +82,14 @@ pub fn transaction(connection_mutex: State<ConnectionMutex>, key: String, value:
         }
         context.transactions.push(TransactionContext {
             transaction: transaction,
-            total: current,
+            total: current.round_dp(2),
         });
         current = next;
     }
+
+    context.total = context.total.round_dp(2);
+    context.input = context.input.round_dp(2);
+    context.output = context.output.round_dp(2);
 
     Ok(Template::render("transaction", &context))
 }

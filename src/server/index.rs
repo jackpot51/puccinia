@@ -60,9 +60,11 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, Strin
 
         context.wallets.push(WalletContext {
             wallet: wallet,
-            total: total,
+            total: total.round_dp(2),
         });
     }
+
+    context.total = context.total.round_dp(2);
 
     Ok(Template::render("index", &context))
 }
