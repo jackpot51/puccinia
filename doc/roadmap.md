@@ -1,0 +1,45 @@
+## Roadmap
+
+The following is a list of desired Puccinia features:
+
+- [x] Automatically retrieve account data
+  - [x] Retrieve from account types using OFX
+    - [x] `CHECKING` - Checking accounts
+    - [x] `CREDITCARD` - Credit card accounts
+    - [x] `INVESTMENT` - Investment accounts
+    - [x] `SAVINGS` - Saving accounts
+  - [x] Retrieve from providers using OFX
+    - [x] `amex` - American Express
+    - [x] `fidelity` - Fidelity
+    - [x] `fidelity_nb` - Fidelity NetBenefits
+    - [x] `tangerine` - Tangerine
+    - [x] `usaa` - USAA
+    - [x] `usaa_inv` - USAA Investments
+    - [x] `vanguard` - Vanguard
+    - [ ] Custom OFX provider
+  - [x] Retrieve cryptocurrency information
+    - [x] Bitcoin address data using blockchain.info
+    - [x] Bitcoin price using Coinnect
+    - [ ] More cryptocurrency support
+- [x] Update data
+  - [x] Periodic updates of positions
+  - [x] Periodic updates of transactions
+  - [ ] Store position data history
+  - [ ] Store stock information seperate from position
+  - [ ] Automatically update data
+- [x] Visualize data
+  - [x] Standard Tables
+    - [x] Wallets
+    - [x] Accounts per Wallet
+    - [x] Positions and Transactions per Account
+  - [x] Filtered Tables
+    - [x] Transactions per Day
+    - [x] Transactions per Name
+    - [ ] Define more sub-items
+  - [x] Charts
+    - [x] Scatter chart of Transactions over Time (Cash Flow)
+    - [x] Line graph of Transaction Total over Time (Net Cash Flow)
+    - [ ] Line graph of position value. Requires history of positions.
+    - [ ] Line graph of net worth. Requires history of positions.
+    - [ ] Define more sub-items
+- [ ] Forecasting

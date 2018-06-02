@@ -19,7 +19,8 @@ Puccinia can access the following sources of financial data:
 
 More documentation is available in the `doc` folder.
 
-[Database Documentation](./doc/database.md)
+[Database](./doc/database.md)
+[Roadmap](./doc/roadmap.md)
 
 ## Usage
 
