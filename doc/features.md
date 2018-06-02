@@ -21,8 +21,7 @@ The following is a list of current and future Puccinia features:
     - [x] Bitcoin address data using blockchain.info
     - [x] Bitcoin price using Coinnect
     - [ ] More cryptocurrency support
-  - [ ] Retrieve stock data from IEX
-    - [ ] Consume API: https://iextrading.com/developer/
+  - [ ] Retrieve stock and fund data
 - [x] Update data
   - [x] Periodic updates of positions
   - [x] Periodic updates of transactions
