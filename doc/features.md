@@ -1,6 +1,6 @@
-## Roadmap
+## Features
 
-The following is a list of desired Puccinia features:
+The following is a list of current and future Puccinia features:
 
 - [x] Automatically retrieve account data
   - [x] Retrieve from account types using OFX
