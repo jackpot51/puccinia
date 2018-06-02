@@ -6,6 +6,7 @@ use ofx::{Ofx, string_to_date};
 
 pub use self::amex::Amex;
 pub use self::fidelity::Fidelity;
+pub use self::fidelity_nb::FidelityNb;
 pub use self::tangerine::Tangerine;
 pub use self::usaa::Usaa;
 pub use self::usaa_inv::UsaaInv;
@@ -13,6 +14,7 @@ pub use self::vanguard::Vanguard;
 
 mod amex;
 mod fidelity;
+mod fidelity_nb;
 mod tangerine;
 mod usaa;
 mod usaa_inv;
@@ -32,6 +34,7 @@ impl BankConfig {
         match self.kind.as_str() {
             "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
             "fidelity" => Ok(Box::new(Fidelity::new(self.name, self.username, self.password, self.accounts))),
+            "fidelity_nb" => Ok(Box::new(FidelityNb::new(self.name, self.username, self.password, self.accounts))),
             "tangerine" => Ok(Box::new(Tangerine::new(self.name, self.username, self.password, self.accounts))),
             "usaa" => Ok(Box::new(Usaa::new(self.name, self.username, self.password, self.accounts))),
             "usaa_inv" => Ok(Box::new(UsaaInv::new(self.name, self.username, self.password, self.accounts))),

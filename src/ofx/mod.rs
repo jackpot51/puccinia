@@ -1,13 +1,10 @@
 use chrono::{Date, TimeZone, Utc};
-use hyper::Client;
-use hyper::client::Body;
-use hyper::net::HttpsConnector;
-use hyper::header::{Accept, Connection, ConnectionOption, ContentType, UserAgent};
-use hyper::status::StatusCode;
-use hyper_native_tls::NativeTlsClient;
-use std::{str, time};
+use reqwest::{Body, Client, StatusCode};
+use reqwest::header::{Accept, Connection, ConnectionOption, ContentType, UserAgent};
+use std::str;
 use std::io::Read;
 
+use err_str;
 use bank::BankAccount;
 
 pub use self::request::Request;
@@ -23,17 +20,11 @@ pub fn date_to_string(date: &Date<Utc>) -> String {
 pub fn string_to_date(string: &str) -> Result<Date<Utc>, String> {
     let mut chars = string.chars();
 
-    let year = chars.by_ref().take(4).collect::<String>().parse().map_err(|err| {
-        format!("{}", err)
-    })?;
+    let year = chars.by_ref().take(4).collect::<String>().parse().map_err(err_str)?;
 
-    let month = chars.by_ref().take(2).collect::<String>().parse().map_err(|err| {
-        format!("{}", err)
-    })?;
+    let month = chars.by_ref().take(2).collect::<String>().parse().map_err(err_str)?;
 
-    let day = chars.by_ref().take(2).collect::<String>().parse().map_err(|err| {
-        format!("{}", err)
-    })?;
+    let day = chars.by_ref().take(2).collect::<String>().parse().map_err(err_str)?;
 
     Ok(Utc.ymd(year, month, day))
 }
@@ -118,34 +109,30 @@ pub trait Ofx {
             end: end
         };
 
-        let request_data = request.encode().map_err(|err| format!("{}", err))?;
+        let request_data = request.encode().map_err(err_str)?;
         println!("Request: [\n{}\n]", str::from_utf8(&request_data).unwrap_or("[Invalid UTF-8]"));
 
-        let tls_client = NativeTlsClient::new().map_err(|err| format!("{}", err))?;
-        let connector = HttpsConnector::new(tls_client);
-        let mut client = Client::with_connector(connector);
-        client.set_read_timeout(Some(time::Duration::new(5, 0)));
-        client.set_write_timeout(Some(time::Duration::new(5, 0)));
+        let client = Client::new();
 
         let mut response = client
             .post(request.url)
             .header(Accept(vec!["application/ofx".parse().unwrap()]))
             .header(Connection(vec![ConnectionOption::Close]))
             .header(ContentType("application/x-ofx".parse().unwrap()))
-            .header(UserAgent("puccinia".to_string()))
-            .body(Body::BufBody(&request_data, request_data.len()))
-            .send().map_err(|err| format!("{}", err))?;
+            .header(UserAgent::new("puccinia".to_string()))
+            .body(Body::from(request_data))
+            .send().map_err(err_str)?;
 
         let mut response_data = Vec::new();
-        response.read_to_end(&mut response_data).map_err(|err| format!("{}", err))?;
+        response.read_to_end(&mut response_data).map_err(err_str)?;
         println!("Response: [\n{}\n]", str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]"));
 
-        match response.status {
+        match response.status() {
             StatusCode::Ok => {
-                Ok(Response::decode(&response_data).map_err(|err| format!("{}", err))?)
+                Ok(Response::decode(&response_data).map_err(err_str)?)
             },
             _ => {
-                Err(format!("error code {}\n{}", response.status, str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")))
+                Err(format!("error code {}\n{}", response.status(), str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")))
             }
         }
     }

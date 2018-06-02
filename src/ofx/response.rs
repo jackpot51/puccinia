@@ -106,7 +106,7 @@ impl Response {
         let mut stack = Vec::new();
         for e_res in r {
             let e = e_res?;
-            //println!("{:?}", e);
+            // println!("{:?}", e);
 
             match e {
                 XmlEvent::StartElement { name, .. } => {
@@ -124,6 +124,13 @@ impl Response {
                     }
                 },
                 XmlEvent::EndElement { name, .. } => {
+                    if let Some(parent) = stack.last() {
+                        if parent.1.contains_key(&name.local_name) {
+                            // println!("{}: Skipping item already in parent", name.local_name);
+                            continue;
+                        }
+                    }
+
                     if let Some((stack_name, mut stack_data)) = stack.pop() {
                         if name.local_name == stack_name {
                             let mut stack_path = String::new();
@@ -157,7 +164,7 @@ impl Response {
 
                                 "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO/BANKACCTINFO/BANKACCTFROM" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKACCTFROM" => {
-                                    println!("Account");
+                                    println!("Bank Account");
                                     response.accounts.push(Account {
                                         id: stack_data.remove("ACCTID"),
                                         kind: stack_data.remove("ACCTTYPE"),
@@ -168,7 +175,7 @@ impl Response {
 
                                 "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO/CCACCTINFO/CCACCTFROM" |
                                 "OFX/CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS/CCACCTFROM" => {
-                                    println!("Account");
+                                    println!("Credit Card Account");
                                     response.accounts.push(Account {
                                         id: stack_data.remove("ACCTID"),
                                         kind: Some("CREDITCARD".to_string()),
@@ -177,8 +184,9 @@ impl Response {
                                     });
                                 },
 
+                                "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO/INVACCTINFO/INVACCTFROM" |
                                 "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVACCTFROM" => {
-                                    println!("Account");
+                                    println!("Investment Account");
                                     response.accounts.push(Account {
                                         id: stack_data.remove("ACCTID"),
                                         kind: Some("INVESTMENT".to_string()),

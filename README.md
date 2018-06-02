@@ -5,6 +5,7 @@ A self-hosted solution for accounting. Known to infect Mint with Rust.
 Puccinia can access the following sources of financial data:
 - Bank, credit card, and investment accounts using [OFX](http://ofx.net/)
   - [American Express](https://www.americanexpress.com/)
+  - [Fidelity](https://www.fidelity.com/)
   - [Tangerine](https://www.tangerine.ca/)
   - [USAA](https://www.usaa.com/)
   - [Vanguard](https://www.vanguard.com/)
@@ -37,11 +38,11 @@ Run `puccinia` with the path to your configuration to download your account
 information:
 
 ```
-cargo run secret.toml
+cargo run --release secret.toml
 ```
 
 Run `puccinia` without a path to simply used the cached information:
 
 ```
-cargo run
+cargo run --release
 ```

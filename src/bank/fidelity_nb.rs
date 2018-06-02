@@ -1,16 +1,16 @@
 use bank::{Bank, BankAccount};
 use ofx::Ofx;
 
-pub struct Fidelity {
+pub struct FidelityNb {
     name: String,
     username: String,
     password: String,
     accounts: Option<Vec<BankAccount>>,
 }
 
-impl Fidelity {
-    pub fn new(name: String, username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Fidelity {
-        Fidelity {
+impl FidelityNb {
+    pub fn new(name: String, username: String, password: String, accounts: Option<Vec<BankAccount>>) -> FidelityNb {
+        FidelityNb {
             name: name,
             username: username,
             password: password,
@@ -19,9 +19,9 @@ impl Fidelity {
     }
 }
 
-impl Bank for Fidelity {
+impl Bank for FidelityNb {
     fn kind(&self) -> &str {
-        "fidelity"
+        "fidelity_nb"
     }
 
     fn name(&self) -> &str {
@@ -41,9 +41,9 @@ impl Bank for Fidelity {
     }
 }
 
-impl Ofx for Fidelity {
+impl Ofx for FidelityNb {
     fn url(&self) -> &str {
-        "https://ofx.fidelity.com/ftgw/OFX/clients/download"
+        "https://nbofx.fidelity.com/netbenefits/ofx/download"
     }
 
     fn username(&self) -> &str {
@@ -55,14 +55,14 @@ impl Ofx for Fidelity {
     }
 
     fn fid(&self) -> &str {
-        "7776"
+        "8288"
     }
 
     fn fid_org(&self) -> &str {
-        "fidelity.com"
+        "nbofx.fidelity.com"
     }
 
     fn broker_id(&self) -> &str {
-        "fidelity.com"
+        "nbofx.fidelity.com"
     }
 }
