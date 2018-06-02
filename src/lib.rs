@@ -3,10 +3,9 @@ extern crate coinnect;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
-extern crate hyper;
-extern crate hyper_native_tls;
 extern crate mime;
 extern crate rand;
+extern crate reqwest;
 extern crate rust_decimal;
 #[macro_use]
 extern crate serde_derive;
@@ -25,6 +24,11 @@ pub mod custom;
 pub mod database;
 pub mod import;
 pub mod ofx;
+
+// Helper function for errors
+pub (crate) fn err_str<E: ::std::fmt::Display>(err: E) -> String {
+    format!("{}", err)
+}
 
 pub struct Puccinia {
     pub bank: BTreeMap<String, Box<Bank>>,
