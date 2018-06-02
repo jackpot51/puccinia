@@ -1,33 +1,33 @@
-#![feature(plugin)]
-#![plugin(rocket_codegen)]
-
+extern crate actix_web;
 extern crate diesel;
+extern crate handlebars;
 extern crate puccinia;
-extern crate rocket;
-extern crate rocket_contrib;
 extern crate rust_decimal;
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;
 
+use actix_web::{server, App, http::Method, fs::StaticFiles};
+use handlebars::Handlebars;
 use puccinia::database::ConnectionMutex;
 use puccinia::import::import;
-use rocket_contrib::Template;
-use rocket::response::NamedFile;
 use std::env;
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 mod account;
 mod index;
 mod json;
+mod template;
 mod transaction;
 mod wallet;
 
-#[get("/static/<file..>")]
-fn static_files(file: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static").join(file)).ok()
+use template::create_templates;
+
+pub struct AppState {
+    pub db: ConnectionMutex,
+    pub templates: Handlebars,
 }
 
 fn main() {
@@ -43,17 +43,16 @@ fn main() {
         import(config_tomls.iter());
     }
 
-    rocket::ignite()
-        .mount("/", routes![
-            index::index,
-            wallet::wallet,
-            account::account,
-            transaction::transaction_all,
-            transaction::transaction,
-            json::json,
-            static_files,
-        ])
-        .attach(Template::fairing())
-        .manage(ConnectionMutex::new())
-        .launch();
+    let main_app = || {
+        App::with_state(Arc::new(AppState { db: ConnectionMutex::new(), templates: create_templates() }))
+            .route("/", Method::GET, index::index)
+            .route("/wallet/{id}", Method::GET, wallet::wallet)
+            .route("/account/{wallet_id}/{id}", Method::GET, account::account)
+            .route("/transaction/{key}/{value}", Method::GET, transaction::transaction)
+            .route("/transaction", Method::GET, transaction::transaction_all)
+            .route("/json", Method::GET, json::json)
+            .handler("/static", StaticFiles::new(".").show_files_listing())
+    };
+
+    server::new(main_app).bind("127.0.0.1:8080").unwrap().run();
 }
