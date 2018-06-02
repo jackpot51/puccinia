@@ -15,6 +15,12 @@ Puccinia can access the following sources of financial data:
   - Bitcoin address balances through [blockchain.info](https://blockchain.info/api)
 - Manual entry
 
+## Documentation
+
+More documentation is available in the `doc` folder.
+
+[Database Documentation](./doc/database.md)
+
 ## Usage
 
 You must have libsqlite3 installed to use `puccinia`. On Ubuntu, you may install
