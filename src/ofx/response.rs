@@ -220,7 +220,8 @@ impl Response {
                                     });
                                 },
 
-                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS" => {
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSSTOCK/INVPOS" => {
                                     println!("Position");
                                     response.positions.push(Position {
                                         id: security_id.take(),
@@ -235,13 +236,15 @@ impl Response {
                                     });
                                 },
 
-                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS/SECID" => {
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSSTOCK/INVPOS/SECID" => {
                                     println!("Position security id");
                                     security_id = stack_data.remove("UNIQUEID");
                                     security_id_kind = stack_data.remove("UNIQUEIDTYPE");
                                 },
 
-                                "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO" => {
+                                "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO" |
+                                "OFX/SECLISTMSGSRSV1/SECLIST/STOCKINFO/SECINFO" => {
                                     println!("Security info");
                                     response.securities.push(Security {
                                         id: security_id.take(),
@@ -253,7 +256,8 @@ impl Response {
                                     });
                                 },
 
-                                "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO/SECID" => {
+                                "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO/SECID" |
+                                "OFX/SECLISTMSGSRSV1/SECLIST/STOCKINFO/SECINFO/SECID" => {
                                     println!("Security info id");
                                     security_id = stack_data.remove("UNIQUEID");
                                     security_id_kind = stack_data.remove("UNIQUEIDTYPE");
