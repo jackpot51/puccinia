@@ -7,7 +7,7 @@ extern crate rust_decimal;
 extern crate serde_derive;
 extern crate toml;
 
-use actix_web::{server, App, http::Method, fs::StaticFiles};
+use actix_web::{server::HttpServer, App, http::Method, fs::StaticFiles};
 use handlebars::Handlebars;
 use puccinia::database::ConnectionMutex;
 use puccinia::import::import;
@@ -54,5 +54,13 @@ fn main() {
             .handler("/static", StaticFiles::new(".").show_files_listing())
     };
 
-    server::new(main_app).bind("127.0.0.1:8080").unwrap().run();
+    // load ssl keys
+    // let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    // builder.set_private_key_file("key.pem", SslFiletype::PEM).unwrap();
+    // builder.set_certificate_chain_file("cert.pem").unwrap();
+
+    HttpServer::new(main_app)
+        .bind("127.0.0.1:8080").unwrap()
+        // .server_ssl(builder).unwrap()
+        .run();
 }

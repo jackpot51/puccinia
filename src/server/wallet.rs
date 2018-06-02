@@ -1,4 +1,4 @@
-use actix_web::{error, Error, Path, State};
+use actix_web::{error, http::StatusCode, HttpResponse, Path, Responder, State};
 use diesel::prelude::*;
 use puccinia::database::models::{Wallet, Account, Position};
 use puccinia::database::schema::{wallets, accounts, positions};
@@ -7,7 +7,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use super::AppState;
 
-pub fn wallet(info: (Path<String>, State<Arc<AppState>>)) -> Result<String, Error> {
+pub fn wallet(info: (Path<String>, State<Arc<AppState>>)) -> impl Responder {
     let connection = info.1.db.lock()
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
     let id: String = info.0.into_inner();
@@ -68,5 +68,6 @@ pub fn wallet(info: (Path<String>, State<Arc<AppState>>)) -> Result<String, Erro
 
     context.total = context.total.round_dp(2);
     info.1.templates.render("wallet", &context)
+        .map(|body| HttpResponse::with_body(StatusCode::OK, body))
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))
 }
