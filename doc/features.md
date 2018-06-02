@@ -40,6 +40,9 @@ The following is a list of current and future Puccinia features:
     - [x] Scatter chart of Transactions over Time (Cash Flow)
     - [x] Line graph of Transaction Total over Time (Net Cash Flow)
     - [ ] Line graph of position value. Requires history of positions.
+    - [ ] Line graph of account value. Requires history of positions.
+    - [ ] Line graph of wallet value. Requires history of positions.
     - [ ] Line graph of net worth. Requires history of positions.
     - [ ] Define more sub-items
 - [ ] Forecasting
+    - [ ] Define more sub-items
