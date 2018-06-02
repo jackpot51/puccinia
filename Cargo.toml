@@ -11,11 +11,10 @@ path = "src/server/main.rs"
 chrono = "0.4"
 coinnect = "0.5"
 dotenv = "0.10"
+handlebars = "0.32"
 hyper-native-tls = "0.2"
 mime = "0.2"
 rand = "0.4"
-rocket = "0.3.6"
-rocket_codegen = "0.3.6"
 rust_decimal = "0.8"
 serde = "1.0"
 serde_derive = "1.0"
@@ -29,10 +28,9 @@ features = ["sqlite"]
 version = "0.10"
 default-features = false
 
-[dependencies.rocket_contrib]
-version = "0.3.6"
-default-features = false
-features = ["handlebars_templates", "json"]
+[dependencies.actix-web]
+version = "0.6"
+features = ["tls"]
 
 [dependencies.xml-rs]
 version = "0.7"

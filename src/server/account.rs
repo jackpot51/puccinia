@@ -1,15 +1,18 @@
+use actix_web::{error, Error, Path, State};
 use diesel::prelude::*;
-use puccinia::database::ConnectionMutex;
 use puccinia::database::models::{Wallet, Account, Position, Transaction};
 use puccinia::database::schema::{wallets, accounts, positions, transactions};
-use rocket::State;
-use rocket_contrib::Template;
 use rust_decimal::Decimal;
 use std::str::FromStr;
+use std::sync::Arc;
+use super::AppState;
 
-#[get("/account/<wallet_id>/<id>")]
-pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: String) -> Result<Template, String> {
-    let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
+pub fn account(info: (Path<(String, String)>, State<Arc<AppState>>)) -> Result<String, Error> {
+    let connection = info.1.db.lock()
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
+    let path = info.0.into_inner();
+    let wallet_id: String = path.0;
+    let id: String = path.1;
 
     #[derive(Serialize)]
     struct TransactionContext {
@@ -31,12 +34,12 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     let wallet = wallets::table
         .find(&wallet_id)
         .first::<Wallet>(&*connection)
-        .map_err(|err| format!("{}", err))?;
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     let account = accounts::table
         .find((&wallet_id, &id))
         .first::<Account>(&*connection)
-        .map_err(|err| format!("{}", err))?;
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     let mut context = Context {
         wallet: wallet,
@@ -53,7 +56,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         .filter(positions::account_id.eq(&id))
         .order(positions::id.asc())
         .load::<Position>(&*connection)
-        .map_err(|err| format!("{}", err))?;
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     for position in positions {
         if let Ok(value) = Decimal::from_str(&position.value) {
@@ -67,7 +70,7 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
         .filter(transactions::account_id.eq(&id))
         .order((transactions::time.desc(), transactions::id.desc()))
         .load::<Transaction>(&*connection)
-        .map_err(|err| format!("{}", err))?;
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     let mut current = context.total;
     for transaction in transactions {
@@ -92,5 +95,6 @@ pub fn account(connection_mutex: State<ConnectionMutex>, wallet_id: String, id: 
     context.input = context.input.round_dp(2);
     context.output = context.output.round_dp(2);
 
-    Ok(Template::render("account", &context))
+    info.1.templates.render("account", &context)
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))
 }
