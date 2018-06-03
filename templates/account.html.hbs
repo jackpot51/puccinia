@@ -12,7 +12,7 @@
         {{#if positions}}
             <br/>
             <h4>Positions</h4>
-            <h5>Total: {{total}}</h5>
+            <h5>Total Value: {{total}}</h5>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>
@@ -26,7 +26,7 @@
                 <tbody>
                     {{#each positions}}
                         <tr>
-                            <td>{{id}}</td>
+                            <td><a href="/position/{{../wallet.id}}/{{../account.id}}/{{id}}">{{id}}</a></td>
                             <td>{{name}}</td>
                             <td align="right">{{units}}</td>
                             <td align="right">{{price}}</td>
@@ -40,15 +40,15 @@
         {{#if transactions}}
             <br/>
             <h4>Transactions</h4>
-            <h5>Input: {{input}}</h5>
-            <h5>Output: {{output}}</h5>
+            <h5>Input Value: {{input}}</h5>
+            <h5>Output Value: {{output}}</h5>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>
                         <th>Time</th>
                         <th>Name</th>
                         <th>Amount</th>
-                        <th>Total</th>
+                        <th>Total Value</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -21,6 +21,7 @@ use std::sync::Arc;
 mod account;
 mod index;
 mod json;
+mod position;
 mod template;
 mod transaction;
 mod wallet;
@@ -57,6 +58,7 @@ fn main() {
             .route("/", Method::GET, index::index)
             .route("/wallet/{id}", Method::GET, wallet::wallet)
             .route("/account/{wallet_id}/{id}", Method::GET, account::account)
+            .route("/position/{wallet_id}/{account_id}/{id}", Method::GET, position::position)
             .route("/transaction/{key}/{value}", Method::GET, transaction::transaction)
             .route("/transaction", Method::GET, transaction::transaction_all)
             .route("/json", Method::GET, json::json)
