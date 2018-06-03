@@ -9,12 +9,37 @@
     <body class="container">
         <h3><a href="/">puccinia</a> &gt; Transaction</h3>
 
+        <br/>
+        <h4>Metrics</h4>
+        <table class="table table-bordered table-hover table-sm">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Original</td>
+                    <td>{{original}}</td>
+                </tr>
+                <tr>
+                    <td>Input</td>
+                    <td>{{input}}</td>
+                </tr>
+                <tr>
+                    <td>Output</td>
+                    <td>{{output}}</td>
+                </tr>
+                <tr>
+                    <td>Final</td>
+                    <td>{{total}}</td>
+            </tbody>
+        </table>
+
         {{#if transactions}}
             <br/>
             <h4>Transactions</h4>
-            <h5>Total: {{total}}</h5>
-            <h5>Input: {{input}}</h5>
-            <h5>Output: {{output}}</h5>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>

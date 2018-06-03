@@ -24,6 +24,7 @@ pub fn account(info: (Path<(String, String)>, State<Arc<AppState>>)) -> impl Res
     struct Context {
         wallet: Wallet,
         account: Account,
+        original: Decimal,
         total: Decimal,
         input: Decimal,
         output: Decimal,
@@ -44,6 +45,7 @@ pub fn account(info: (Path<(String, String)>, State<Arc<AppState>>)) -> impl Res
     let mut context = Context {
         wallet: wallet,
         account: account,
+        original: Decimal::new(0, 0),
         total: Decimal::new(0, 0),
         input: Decimal::new(0, 0),
         output: Decimal::new(0, 0),
@@ -91,6 +93,7 @@ pub fn account(info: (Path<(String, String)>, State<Arc<AppState>>)) -> impl Res
         current = next;
     }
 
+    context.original = current.round_dp(2);
     context.total = context.total.round_dp(2);
     context.input = context.input.round_dp(2);
     context.output = context.output.round_dp(2);

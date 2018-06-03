@@ -31,13 +31,42 @@
             </tbody>
         </table>
 
+        <br/>
+        <h4>Metrics</h4>
+        <table class="table table-bordered table-hover table-sm">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Units</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Original</td>
+                    <td>{{original_units}}</td>
+                    <td>{{original_value}}</td>
+                </tr>
+                <tr>
+                    <td>Input</td>
+                    <td>{{input_units}}</td>
+                    <td>{{input_value}}</td>
+                </tr>
+                <tr>
+                    <td>Output</td>
+                    <td>{{output_units}}</td>
+                    <td>{{output_value}}</td>
+                </tr>
+                <tr>
+                    <td>Final</td>
+                    <td>{{position.units}}</td>
+                    <td>{{position.value}}</td>
+            </tbody>
+        </table>
+
         {{#if transactions}}
             <br/>
             <h4>Transactions</h4>
-            <h5>Input Units: {{input_units}}</h5>
-            <h5>Input Value: {{input_value}}</h5>
-            <h5>Output Units: {{output_units}}</h5>
-            <h5>Output Value: {{output_value}}</h5>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>

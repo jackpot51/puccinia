@@ -27,6 +27,7 @@ fn transaction_(state: State<Arc<AppState>>, key: String, value: String) -> impl
 
     #[derive(Serialize)]
     struct Context {
+        original: Decimal,
         total: Decimal,
         input: Decimal,
         output: Decimal,
@@ -58,6 +59,7 @@ fn transaction_(state: State<Arc<AppState>>, key: String, value: String) -> impl
     };
 
     let mut context = Context {
+        original: Decimal::new(0, 0),
         total: Decimal::new(0, 0),
         input: Decimal::new(0, 0),
         output: Decimal::new(0, 0),
@@ -89,6 +91,7 @@ fn transaction_(state: State<Arc<AppState>>, key: String, value: String) -> impl
         current = next;
     }
 
+    context.original = current.round_dp(2);
     context.total = context.total.round_dp(2);
     context.input = context.input.round_dp(2);
     context.output = context.output.round_dp(2);

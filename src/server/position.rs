@@ -29,6 +29,8 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
         wallet: Wallet,
         account: Account,
         position: Position,
+        original_units: Decimal,
+        original_value: Decimal,
         input_units: Decimal,
         input_value: Decimal,
         output_units: Decimal,
@@ -59,6 +61,8 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
         wallet: wallet,
         account: account,
         position: position,
+        original_units: Decimal::new(0, 0),
+        original_value: Decimal::new(0, 0),
         input_units: Decimal::new(0, 0),
         input_value: Decimal::new(0, 0),
         output_units: Decimal::new(0, 0),
@@ -115,6 +119,8 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
         current_value = next_value;
     }
 
+    context.original_units = current_units;
+    context.original_value = current_value.round_dp(2);
     context.input_value = context.input_value.round_dp(2);
     context.output_value = context.output_value.round_dp(2);
 
