@@ -14,6 +14,7 @@ function generate(response, wallet_id) {
 
     convert_transactions(transactions, position_transactions);
 
+    chart(document.getElementById("chart_change_in_value"), 'line', 'Change in Value', change_in_value(positions, position_transactions, prices));
     chart(document.getElementById("chart_value"), 'line', 'Value', value(positions, position_transactions, prices));
     chart(document.getElementById("chart_cash_flow"), 'scatter', 'Cash Flow', cash_flow(transactions));
     chart(document.getElementById("chart_net_cash_flow"), 'line', 'Net Cash Flow', net_cash_flow(transactions));

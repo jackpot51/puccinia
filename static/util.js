@@ -71,6 +71,25 @@ function convert_transactions(transactions, position_transactions) {
     });
 }
 
+function change_in_value(positions, transactions, prices) {
+    var value_data = value(positions, transactions, prices);
+
+    var data = [];
+    for (var i = 1; i < value_data.length; i++) {
+        var last = value_data[i - 1];
+        var point = value_data[i];
+
+        data.push({
+            x: point.x,
+            y: point.y - last.y,
+            title: point.title,
+            label: point.label
+        });
+    }
+
+    return data;
+}
+
 function value(positions, transactions, prices) {
     var data = [];
     var last_y = {};
