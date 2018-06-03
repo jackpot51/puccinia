@@ -56,16 +56,24 @@ function chart(element, type, title, data) {
 }
 
 function generate(response, wallet_id, account_id) {
-    var wallets = response.wallets;
-    var accounts = response.accounts;
-    var transactions = response.transactions;
-
-    var wallet = wallets.find(function(wallet) {
+    var wallet = response.wallets.find(function(wallet) {
         return wallet.id == wallet_id;
     });
-    var account = accounts.find(function(account) {
+    var account = response.accounts.find(function(account) {
         return account.wallet_id == wallet_id
             && account.id == account_id;
+    });
+    var positions = response.positions.filter(function(position) {
+        return position.wallet_id == wallet_id
+            && position.account_id == account_id;
+    });
+    var position_transactions = response.position_transactions.filter(function(transaction) {
+        return transaction.wallet_id == wallet_id
+            && transaction.account_id == account_id;
+    });
+    var transactions = response.transactions.filter(function(transaction) {
+        return transaction.wallet_id == wallet_id
+            && transaction.account_id == account_id;
     });
 
     var data = [];
@@ -73,29 +81,25 @@ function generate(response, wallet_id, account_id) {
     var total = 0.0;
     for (var i = 0; i < transactions.length; i++) {
         var transaction = transactions[i];
-        if (
-            transaction.wallet_id == wallet_id
-            && transaction.account_id == account_id
-        ) {
-            var date = new Date(transaction.time);
-            var amount = parseFloat(transaction.amount);
-            data.push({
-                x: date,
-                y: Math.round(amount * 100.0)/100.0,
-                wallet: wallet,
-                account: account,
-                transaction: transaction
-            });
 
-            total += amount;
-            integral.push({
-                x: date,
-                y: Math.round(total * 100.0)/100.0,
-                wallet: wallet,
-                account: account,
-                transaction: transaction
-            });
-        }
+        var date = new Date(transaction.time);
+        var amount = parseFloat(transaction.amount);
+        data.push({
+            x: date,
+            y: Math.round(amount * 100.0)/100.0,
+            wallet: wallet,
+            account: account,
+            transaction: transaction
+        });
+
+        total += amount;
+        integral.push({
+            x: date,
+            y: Math.round(total * 100.0)/100.0,
+            wallet: wallet,
+            account: account,
+            transaction: transaction
+        });
     }
 
     chart(document.getElementById("chart_cash_flow"), 'scatter', 'Cash Flow', data);
