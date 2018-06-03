@@ -73,7 +73,10 @@ function convert_transactions(transactions, position_transactions) {
 
 function value(positions, transactions, prices) {
     var data = [];
+    var last_y = {};
     positions.forEach(function(position) {
+        var position_path = position.wallet_id + "/" + position.account_id + "/" + position.id;
+
         var position_transactions = transactions.filter(function(transaction) {
             return transaction.wallet_id == position.wallet_id
                 && transaction.account_id == position.account_id
@@ -91,6 +94,11 @@ function value(positions, transactions, prices) {
         var last_time = 0;
         for (var i = share_data.length - 1; i >= 0; i--) {
             var share_point = share_data[i];
+
+            if (i == 0) {
+                last_y[position_path] = share_point.y;
+            }
+
             if (share_point.x.getTime() == last_time) {
                 continue;
             }
@@ -99,7 +107,6 @@ function value(positions, transactions, prices) {
                 return point.x.getTime() == share_point.x.getTime();
             });
 
-            var position_path = position.wallet_id + "/" + position.account_id + "/" + position.id;
             if (point === undefined) {
                 var y = {};
                 y[position_path] = parseFloat(share_point.y);
@@ -121,7 +128,6 @@ function value(positions, transactions, prices) {
         return a.x.getTime() - b.x.getTime();
     });
 
-    var last_y = {};
     for (var i = 0; i < data.length; i++) {
         var point = data[i];
 
