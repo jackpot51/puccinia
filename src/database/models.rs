@@ -1,4 +1,4 @@
-use super::schema::{wallets, accounts, positions, transactions};
+use super::schema::{wallets, accounts, positions, position_transactions, transactions};
 
 #[derive(Insertable, Queryable, Serialize)]
 #[table_name = "wallets"]
@@ -22,6 +22,20 @@ pub struct Position {
     pub account_id: String,
     pub id: String,
     pub name: String,
+    pub units: String,
+    pub price: String,
+    pub value: String,
+}
+
+#[derive(Insertable, Queryable, Serialize)]
+#[table_name = "position_transactions"]
+pub struct PositionTransaction {
+    pub wallet_id: String,
+    pub account_id: String,
+    pub position_id: String,
+    pub id: String,
+    pub name: String,
+    pub time: String,
     pub units: String,
     pub price: String,
     pub value: String,

@@ -42,6 +42,23 @@ pub struct Position {
 }
 
 #[derive(Debug, Default)]
+pub struct PositionTransaction {
+    pub id: Option<String>,
+    pub trade: Option<String>,
+    pub settle: Option<String>,
+    pub memo: Option<String>,
+    pub security_id: Option<String>,
+    pub security_id_kind: Option<String>,
+    pub commission: Option<String>,
+    pub income_type: Option<String>,
+    pub sub_account_fund: Option<String>,
+    pub sub_account_sec: Option<String>,
+    pub total: Option<String>,
+    pub unit_price: Option<String>,
+    pub units: Option<String>,
+}
+
+#[derive(Debug, Default)]
 pub struct Security {
     pub id: Option<String>,
     pub id_kind: Option<String>,
@@ -75,6 +92,7 @@ pub struct Response {
     pub start: Option<String>,
     pub end: Option<String>,
     pub positions: Vec<Position>,
+    pub position_transactions: Vec<PositionTransaction>,
     pub securities: Vec<Security>,
     pub transactions: Vec<Transaction>,
 }
@@ -103,6 +121,10 @@ impl Response {
 
         let mut security_id = None;
         let mut security_id_kind = None;
+        let mut position_transaction_settle = None;
+        let mut position_transaction_trade = None;
+        let mut position_transaction_id = None;
+        let mut position_transaction_memo = None;
         let mut stack = Vec::new();
         for e_res in r {
             let e = e_res?;
@@ -228,6 +250,13 @@ impl Response {
                                     });
                                 },
 
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSSTOCK/INVPOS/SECID" => {
+                                    println!("Position security id");
+                                    security_id = stack_data.remove("UNIQUEID");
+                                    security_id_kind = stack_data.remove("UNIQUEIDTYPE");
+                                },
+
                                 "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS" |
                                 "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSSTOCK/INVPOS" => {
                                     println!("Position");
@@ -244,11 +273,52 @@ impl Response {
                                     });
                                 },
 
-                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSMF/INVPOS/SECID" |
-                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVPOSLIST/POSSTOCK/INVPOS/SECID" => {
-                                    println!("Position security id");
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/BUYMF/INVBUY/INVTRAN" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/BUYSTOCK/INVBUY/INVTRAN" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/INCOME/INVTRAN" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/REINVEST/INVTRAN" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/SELLMF/INVSELL/INVTRAN" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/SELLSTOCK/INVSELL/INVTRAN" => {
+                                    println!("Position transaction metadata");
+                                    position_transaction_settle = stack_data.remove("DTSETTLE");
+                                    position_transaction_trade = stack_data.remove("DTTRADE");
+                                    position_transaction_id = stack_data.remove("FITID");
+                                    position_transaction_memo = stack_data.remove("MEMO");
+                                },
+
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/BUYMF/INVBUY/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/BUYSTOCK/INVBUY/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/INCOME/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/REINVEST/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/SELLMF/INVSELL/SECID" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/SELLSTOCK/INVSELL/SECID" => {
+                                    println!("Position transaction security id");
                                     security_id = stack_data.remove("UNIQUEID");
                                     security_id_kind = stack_data.remove("UNIQUEIDTYPE");
+                                },
+
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/BUYMF/INVBUY" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/BUYSTOCK/INVBUY" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/INCOME" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/REINVEST" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/SELLMF/INVSELL" |
+                                "OFX/INVSTMTMSGSRSV1/INVSTMTTRNRS/INVSTMTRS/INVTRANLIST/SELLSTOCK/INVSELL" => {
+                                    println!("Position transaction");
+                                    response.position_transactions.push(PositionTransaction {
+                                        id: position_transaction_id.take(),
+                                        trade: position_transaction_trade.take(),
+                                        settle: position_transaction_settle.take(),
+                                        memo: position_transaction_memo.take(),
+                                        security_id: security_id.take(),
+                                        security_id_kind: security_id_kind.take(),
+                                        commission: stack_data.remove("COMMISSION"),
+                                        income_type: stack_data.remove("INCOMETYPE"),
+                                        sub_account_fund: stack_data.remove("SUBACCTFUND"),
+                                        sub_account_sec: stack_data.remove("SUBACCTSEC"),
+                                        total: stack_data.remove("TOTAL"),
+                                        unit_price: stack_data.remove("UNITPRICE"),
+                                        units: stack_data.remove("UNITS")
+                                    });
                                 },
 
                                 "OFX/SECLISTMSGSRSV1/SECLIST/MFINFO/SECINFO" |
@@ -289,6 +359,8 @@ impl Response {
                 _ => ()
             }
         }
+
+        // println!("{:#?}", response);
 
         Ok(response)
     }

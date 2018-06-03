@@ -5,8 +5,8 @@ use toml;
 
 use Config;
 use database::{establish_connection};
-use database::models::{Wallet, Account, Position, Transaction};
-use database::schema::{wallets, accounts, positions, transactions};
+use database::models::{Wallet, Account, Position, PositionTransaction, Transaction};
+use database::schema::{wallets, accounts, positions, position_transactions, transactions};
 
 pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
     let connection = establish_connection();
@@ -27,13 +27,6 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
     diesel::delete(positions::table)
         .execute(&connection)
         .unwrap();
-
-    // Not deleted because we update transactions in a streaming method, meaning that
-    // we may only receive 90 days of transactions but want to keep as many as we have
-    // in history
-    // diesel::delete(transactions::table)
-    //     .execute(&connection)
-    //     .unwrap();
 
     for config_toml in config_tomls {
         let config: Config = toml::from_str(config_toml.as_ref()).unwrap();
@@ -67,7 +60,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                         .values(&Position {
                             wallet_id: id.to_string(),
                             account_id: account.id.clone(),
-                            id: position.id,
+                            id: position.id.clone(),
                             name: position.name,
                             units: format!("{}", position.units),
                             price: format!("{}", position.price),
@@ -75,6 +68,23 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                         })
                         .execute(&connection)
                         .unwrap();
+
+                    for transaction in position.transactions {
+                        diesel::replace_into(position_transactions::table)
+                            .values(&PositionTransaction {
+                                wallet_id: id.to_string(),
+                                account_id: account.id.clone(),
+                                position_id: position.id.clone(),
+                                id: transaction.id,
+                                name: transaction.name,
+                                time: format!("{}", transaction.time.format("%Y-%m-%d")),
+                                units: format!("{}", transaction.units),
+                                price: format!("{}", transaction.price),
+                                value: format!("{}", transaction.value),
+                            })
+                            .execute(&connection)
+                            .unwrap();
+                    }
                 }
 
                 for transaction in statement.transactions {

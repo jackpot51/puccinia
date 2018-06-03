@@ -7,6 +7,20 @@ table! {
 }
 
 table! {
+    position_transactions (wallet_id, account_id, id) {
+        wallet_id -> Text,
+        account_id -> Text,
+        position_id -> Text,
+        id -> Text,
+        name -> Text,
+        time -> Text,
+        units -> Text,
+        price -> Text,
+        value -> Text,
+    }
+}
+
+table! {
     positions (wallet_id, account_id, id) {
         wallet_id -> Text,
         account_id -> Text,
@@ -37,11 +51,13 @@ table! {
 }
 
 joinable!(accounts -> wallets (wallet_id));
+joinable!(position_transactions -> wallets (wallet_id));
 joinable!(positions -> wallets (wallet_id));
 joinable!(transactions -> wallets (wallet_id));
 
 allow_tables_to_appear_in_same_query!(
     accounts,
+    position_transactions,
     positions,
     transactions,
     wallets,

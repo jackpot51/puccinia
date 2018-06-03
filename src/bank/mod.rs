@@ -50,12 +50,22 @@ pub struct BankAccount {
     pub kind: String,
 }
 
+pub struct BankPositionTransaction {
+    pub id: String,
+    pub name: String,
+    pub time: Date<Utc>,
+    pub units: Decimal,
+    pub price: Decimal,
+    pub value: Decimal,
+}
+
 pub struct BankPosition {
     pub id: String,
     pub name: String,
     pub units: Decimal,
     pub price: Decimal,
     pub value: Decimal,
+    pub transactions: Vec<BankPositionTransaction>
 }
 
 pub struct BankTransaction {
@@ -94,6 +104,7 @@ pub trait Bank: Send + Sync {
                         units: value,
                         price: Decimal::new(1, 0),
                         value: value,
+                        transactions: Vec::new()
                     });
                 }
             }
@@ -107,6 +118,40 @@ pub trait Bank: Send + Sync {
                             if &p_id == s_id {
                                 name = security.name.clone();
                                 ticker = security.ticker.clone();
+                            }
+                        }
+                    }
+
+                    let mut transactions = Vec::new();
+                    for transaction in &response.position_transactions {
+                        if let Some(ref s_id) = transaction.security_id {
+                            if &p_id == s_id {
+                                if let Some(ref id) = transaction.id {
+                                    if let Some(ref settle) = transaction.settle {
+                                        if let Some(ref units) = transaction.units {
+                                            if let Some(ref price) = transaction.unit_price {
+                                                if let Some(ref value) = transaction.total {
+                                                    transactions.push(BankPositionTransaction {
+                                                        id: id.clone(),
+                                                        name: transaction.memo.clone().unwrap_or(String::new()),
+                                                        time: string_to_date(&settle).map_err(|err| {
+                                                            format!("invalid date: {}: {}", settle, err)
+                                                        })?,
+                                                        units: Decimal::from_str(&units).map_err(|err| {
+                                                            format!("invalid decimal: {}: {}", units, err)
+                                                        })?.normalize(),
+                                                        price: Decimal::from_str(&price).map_err(|err| {
+                                                            format!("invalid decimal: {}: {}", price, err)
+                                                        })?.normalize(),
+                                                        value: Decimal::from_str(&value).map_err(|err| {
+                                                            format!("invalid decimal: {}: {}", value, err)
+                                                        })?.normalize(),
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -126,6 +171,7 @@ pub trait Bank: Send + Sync {
                                     value: Decimal::from_str(&value).map_err(|err| {
                                         format!("invalid decimal: {}: {}", value, err)
                                     })?.normalize(),
+                                    transactions: transactions
                                 });
                             }
                         }
