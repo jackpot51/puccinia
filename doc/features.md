@@ -25,7 +25,8 @@ The following is a list of current and future Puccinia features:
 - [x] Update data
   - [x] Periodic updates of positions
   - [x] Periodic updates of transactions
-  - [x] Store position data history
+  - [x] Store position transaction history
+  - [ ] Store position price history
   - [ ] Store stock information separate from position
   - [ ] Automatically update data
 - [x] Visualize data
