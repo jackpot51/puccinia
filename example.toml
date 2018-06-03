@@ -1,5 +1,8 @@
 # Before putting in your personal details, copy this file to secret.toml
 
+# This is the API key for https://www.alphavantage.co/
+alpha_vantage = "demo"
+
 # Unfortunately, there is no example OFX API that can be used for demonstration
 # Uncomment the following lines and edit to your own details to use
 # [bank.example]

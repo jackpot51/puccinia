@@ -13,6 +13,7 @@ extern crate serde_derive;
 extern crate toml;
 extern crate xml;
 
+use alpha_vantage::AlphaVantage;
 use std::collections::BTreeMap;
 
 use bank::{Bank, BankConfig};
@@ -32,6 +33,7 @@ pub (crate) fn err_str<E: ::std::fmt::Display>(err: E) -> String {
 }
 
 pub struct Puccinia {
+    pub alpha_vantage: AlphaVantage,
     pub bank: BTreeMap<String, Box<Bank>>,
     pub crypto: BTreeMap<String, Box<Crypto>>,
     pub custom: BTreeMap<String, Custom>,
@@ -39,6 +41,8 @@ pub struct Puccinia {
 
 #[derive(Deserialize, Serialize)]
 pub struct Config {
+    #[serde(default)]
+    pub alpha_vantage: String,
     #[serde(default)]
     pub bank: BTreeMap<String, BankConfig>,
     #[serde(default)]
@@ -50,6 +54,7 @@ pub struct Config {
 impl Config {
     pub fn build(self) -> Result<Puccinia, String> {
         let mut puccinia = Puccinia {
+            alpha_vantage: AlphaVantage::new(&self.alpha_vantage),
             bank: BTreeMap::new(),
             crypto: BTreeMap::new(),
             custom: BTreeMap::new()
