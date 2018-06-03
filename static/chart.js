@@ -67,11 +67,12 @@ function generate(response, start_date, end_date) {
     var total = 0.0;
     for (var i = 0; i < transactions.length; i++) {
         var transaction = transactions[i];
-        var account = accounts.find(function(account) {
-            return account.id == transaction.account_id;
-        });
         var wallet = wallets.find(function(wallet) {
             return wallet.id == transaction.wallet_id;
+        });
+        var account = accounts.find(function(account) {
+            return account.wallet_id == transaction.wallet_id
+                && account.id == transaction.account_id;
         });
 
         var date = new Date(transaction.time);
