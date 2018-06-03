@@ -52,7 +52,9 @@ impl AlphaVantage {
 
         let json = query.build().json().map_err(err_str)?;
 
-        serde_json::from_str(&json).map_err(err_str)
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
     }
 
 
@@ -66,7 +68,9 @@ impl AlphaVantage {
 
         let json = query.build().json().map_err(err_str)?;
 
-        serde_json::from_str(&json).map_err(err_str)
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
     }
 
     pub fn weekly(&self, symbol: &str, full: bool) -> Result<Weekly, String> {
@@ -79,7 +83,9 @@ impl AlphaVantage {
 
         let json = query.build().json().map_err(err_str)?;
 
-        serde_json::from_str(&json).map_err(err_str)
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
     }
 
 
@@ -93,7 +99,9 @@ impl AlphaVantage {
 
         let json = query.build().json().map_err(err_str)?;
 
-        serde_json::from_str(&json).map_err(err_str)
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
     }
 
     pub fn monthly(&self, symbol: &str, full: bool) -> Result<Monthly, String> {
@@ -106,7 +114,9 @@ impl AlphaVantage {
 
         let json = query.build().json().map_err(err_str)?;
 
-        serde_json::from_str(&json).map_err(err_str)
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
     }
 
 
@@ -120,7 +130,9 @@ impl AlphaVantage {
 
         let json = query.build().json().map_err(err_str)?;
 
-        serde_json::from_str(&json).map_err(err_str)
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
     }
 }
 

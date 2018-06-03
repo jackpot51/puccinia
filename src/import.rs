@@ -86,18 +86,28 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                             .unwrap();
                     }
 
-                    if let Ok(data) = puccinia.alpha_vantage.daily(&position.id, false) {
-                        for (time, point) in data.series {
-                            diesel::replace_into(position_prices::table)
-                                .values(&PositionPrice {
-                                    wallet_id: id.to_string(),
-                                    account_id: account.id.clone(),
-                                    position_id: position.id.clone(),
-                                    time: time,
-                                    price: point.close,
-                                })
-                                .execute(&connection)
-                                .unwrap();
+                    if position.id != "balance" {
+                        //TODO: Adjust for throttling, only call if no up to date price
+                        println!("downloading prices for {}", position.id);
+                        match puccinia.alpha_vantage.daily(&position.id, false) {
+                            Ok(data) => {
+                                println!("downloaded {} prices for {}", data.series.len(), position.id);
+                                for (time, point) in data.series {
+                                    diesel::replace_into(position_prices::table)
+                                        .values(&PositionPrice {
+                                            wallet_id: id.to_string(),
+                                            account_id: account.id.clone(),
+                                            position_id: position.id.clone(),
+                                            time: time,
+                                            price: point.close,
+                                        })
+                                        .execute(&connection)
+                                        .unwrap();
+                                }
+                            },
+                            Err(err) => {
+                                println!("failed to download prices for {}: {}", position.id, err);
+                            }
                         }
                     }
                 }

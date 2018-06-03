@@ -38,11 +38,11 @@ function chart(element, type, title, data) {
                     title: function(tooltipItems, data) {
                         var tooltipItem = tooltipItems[0];
                         var item = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        return item.transaction.time;
+                        return item.title;
                     },
                     label: function(tooltipItem, data) {
                         var item = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        return item.transaction.name;
+                        return item.label;
                     },
                     afterLabel: function(tooltipItem, data) {
                         var item = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
@@ -59,6 +59,7 @@ function generate(response, wallet_id, account_id, position_id) {
     var wallets = response.wallets;
     var accounts = response.accounts;
     var positions = response.positions;
+    var prices = response.position_prices;
     var transactions = response.position_transactions;
 
     var wallet = wallets.find(function(wallet) {
@@ -73,6 +74,25 @@ function generate(response, wallet_id, account_id, position_id) {
             && position.account_id == account_id
             && position.id == position_id;
     });
+
+    var data_price = [];
+    for (var i = 0; i < prices.length; i++) {
+        var price = prices[i];
+        if (
+            price.wallet_id == wallet_id
+            && price.account_id == account_id
+            && price.position_id == position_id
+        ) {
+            var date = new Date(price.time);
+            var value = parseFloat(price.price);
+            data_price.push({
+                x: date,
+                y: value,
+                title: price.time,
+                label: position_id
+            });
+        }
+    }
 
     var data_units = [];
     var integral_units = [];
@@ -92,18 +112,16 @@ function generate(response, wallet_id, account_id, position_id) {
             data_units.push({
                 x: date,
                 y: units,
-                wallet: wallet,
-                account: account,
-                transaction: transaction
+                title: transaction.time,
+                label: transaction.name
             });
 
             total_units += units;
             integral_units.push({
                 x: date,
                 y: units,
-                wallet: wallet,
-                account: account,
-                transaction: transaction
+                title: transaction.time,
+                label: transaction.name
             });
 
 
@@ -111,22 +129,21 @@ function generate(response, wallet_id, account_id, position_id) {
             data_value.push({
                 x: date,
                 y: Math.round(value * 100.0)/100.0,
-                wallet: wallet,
-                account: account,
-                transaction: transaction
+                title: transaction.time,
+                label: transaction.name
             });
 
             total_value += value;
             integral_value.push({
                 x: date,
                 y: Math.round(value * 100.0)/100.0,
-                wallet: wallet,
-                account: account,
-                transaction: transaction
+                title: transaction.time,
+                label: transaction.name
             });
         }
     }
 
+    chart(document.getElementById("chart_price"), 'line', 'Price', data_price);
     chart(document.getElementById("chart_change_in_shares"), 'scatter', 'Change in Shares', data_units);
     chart(document.getElementById("chart_total_shares"), 'line', 'Total Shares', integral_units);
     chart(document.getElementById("chart_cash_flow"), 'scatter', 'Cash Flow', data_value);
