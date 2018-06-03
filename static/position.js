@@ -96,6 +96,14 @@ function generate(response, wallet_id, account_id, position_id) {
     var data_value = [];
     var current_units = parseFloat(position.units);
     var j = prices.length - 1;
+    var add_price = function(price) {
+        data_value.push({
+            x: new Date(price.time),
+            y: Math.round(parseFloat(price.price) * current_units * 100.0)/100.0,
+            title: price.time + "Price",
+            label: position_id + ": " + current_units + " @ " + price.price
+        });
+    };
     for (var i = transactions.length - 1; i >= 0; i--) {
         var transaction = transactions[i];
 
@@ -106,18 +114,13 @@ function generate(response, wallet_id, account_id, position_id) {
                 break;
             }
 
-            data_value.push({
-                x: new Date(price.time),
-                y: Math.round(parseFloat(price.price) * current_units * 100.0)/100.0,
-                title: price.time,
-                label: position_id + ": " + current_units + " @ " + price.price
-            });
+            add_price(price);
         }
 
         data_value.push({
             x: new Date(transaction.time),
             y: Math.round(parseFloat(transaction.price) * current_units * 100.0)/100.0,
-            title: transaction.time,
+            title: transaction.time + " Transaction",
             label: position_id + ": " + current_units + " @ " + transaction.price
         });
 
@@ -128,12 +131,7 @@ function generate(response, wallet_id, account_id, position_id) {
                 break;
             }
 
-            data_value.push({
-                x: new Date(price.time),
-                y: Math.round(parseFloat(price.price) * current_units * 100.0)/100.0,
-                title: price.time,
-                label: position_id + ": " + current_units + " @ " + price.price
-            });
+            add_price(price);
         }
 
         current_units -= parseFloat(transaction.units);
@@ -141,12 +139,7 @@ function generate(response, wallet_id, account_id, position_id) {
     for (; j >= 0; j--) {
         var price = prices[j];
 
-        data_value.push({
-            x: new Date(price.time),
-            y: Math.round(parseFloat(price.price) * current_units * 100.0)/100.0,
-            title: price.time,
-            label: position_id + ": " + current_units + " @ " + price.price
-        });
+        add_price(price);
     }
     data_value = data_value.reverse();
 
