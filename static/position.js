@@ -22,6 +22,14 @@ function generate(response, wallet_id, account_id, position_id) {
             && transaction.position_id == position_id;
     });
 
+    if (position_id === "balance") {
+        var balance_transactions = response.transactions.filter(function(transaction) {
+            return transaction.wallet_id == wallet_id
+                && transaction.account_id == account_id;
+        });
+        convert_transactions(balance_transactions, transactions);
+    }
+
     chart(document.getElementById("chart_price"), 'line', 'Price', share_price(prices));
     chart(document.getElementById("chart_value"), 'line', 'Value', share_value(position, transactions, prices));
     chart(document.getElementById("chart_change_in_shares"), 'scatter', 'Change in Shares', cash_flow(transactions, "units"));

@@ -41,7 +41,7 @@ The following is a list of current and future Puccinia features:
   - [x] Charts
     - [x] Scatter chart of Cash Flow
     - [x] Line graph of Net Cash Flow
-    - [ ] Line graph of position value. Requires history of positions.
+    - [x] Line graph of position value. Requires history of positions.
     - [ ] Line graph of account value. Requires history of positions.
     - [ ] Line graph of wallet value. Requires history of positions.
     - [ ] Line graph of net worth. Requires history of positions.
