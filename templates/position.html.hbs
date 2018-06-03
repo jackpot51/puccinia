@@ -34,17 +34,22 @@
         {{#if transactions}}
             <br/>
             <h4>Transactions</h4>
-            <h5>Input Units: {{input}}</h5>
-            <h5>Output Units: {{output}}</h5>
+            <h5>Input Units: {{input_units}}</h5>
+            <h5>Input Value: {{input_value}}</h5>
+            <h5>Output Units: {{output_units}}</h5>
+            <h5>Output Value: {{output_value}}</h5>
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                     <tr>
                         <th>Time</th>
                         <th>Name</th>
                         <th>Units</th>
+                        <th>Total Units</th>
                         <th>Price</th>
                         <th>Value</th>
-                        <th>Total Units</th>
+                        <th>Current Value</th>
+                        <th>Change in Value</th>
+                        <th>Total Value</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,9 +58,12 @@
                             <td><a href="/transaction/time/{{transaction.time}}">{{transaction.time}}</a></td>
                             <td><a href="/transaction/name/{{transaction.name}}">{{transaction.name}}</a></td>
                             <td align="right">{{transaction.units}}</td>
+                            <td align="right">{{total_units}}</td>
                             <td align="right">{{transaction.price}}</td>
                             <td align="right">{{transaction.value}}</td>
-                            <td align="right">{{total}}</td>
+                            <td align="right">{{value}}</td>
+                            <td align="right">{{value_change}}</td>
+                            <td align="right">{{total_value}}</td>
                         </tr>
                     {{/each}}
                 </tbody>

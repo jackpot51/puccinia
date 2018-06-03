@@ -18,7 +18,10 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
     #[derive(Serialize)]
     struct TransactionContext {
         transaction: PositionTransaction,
-        total: Decimal,
+        total_units: Decimal,
+        value: Decimal,
+        value_change: Decimal,
+        total_value: Decimal,
     }
 
     #[derive(Serialize)]
@@ -26,9 +29,10 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
         wallet: Wallet,
         account: Account,
         position: Position,
-        total: Decimal,
-        input: Decimal,
-        output: Decimal,
+        input_units: Decimal,
+        input_value: Decimal,
+        output_units: Decimal,
+        output_value: Decimal,
         transactions: Vec<TransactionContext>,
     }
 
@@ -47,19 +51,18 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
         .first::<Position>(&*connection)
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
-    let position_total = if let Ok(units) = Decimal::from_str(&position.units) {
-        units.clone()
-    } else {
-        Decimal::new(0, 0)
-    };
+    let position_units = Decimal::from_str(&position.units).unwrap_or(Decimal::new(0, 0));
+    let position_price = Decimal::from_str(&position.price).unwrap_or(Decimal::new(0, 0));
+    let position_value = Decimal::from_str(&position.value).unwrap_or(Decimal::new(0, 0));
 
     let mut context = Context {
         wallet: wallet,
         account: account,
         position: position,
-        total: position_total,
-        input: Decimal::new(0, 0),
-        output: Decimal::new(0, 0),
+        input_units: Decimal::new(0, 0),
+        input_value: Decimal::new(0, 0),
+        output_units: Decimal::new(0, 0),
+        output_value: Decimal::new(0, 0),
         transactions: Vec::new()
     };
 
@@ -71,24 +74,49 @@ pub fn position(info: (Path<(String, String, String)>, State<Arc<AppState>>)) ->
         .load::<PositionTransaction>(&*connection)
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
-    let mut current = context.total;
+    let mut current_units = position_units;
+    let mut current_value = position_value;
     for transaction in transactions {
-        let mut next = current;
+        let mut next_units = current_units;
+        let mut next_value = current_value;
+        let mut value = Decimal::new(0, 0);
         if let Ok(units) = Decimal::from_str(&transaction.units) {
-            next -= units;
+            value = units * position_price;
+            next_units -= units;
+            next_value -= value;
             if units.is_sign_positive() {
-                context.input += units;
+                context.input_units += units;
             }
             if units.is_sign_negative() {
-                context.output += units;
+                context.output_units += units;
             }
         }
+
+        let mut value_change = Decimal::new(0, 0);
+        if let Ok(transaction_value) = Decimal::from_str(&transaction.value) {
+            value_change = value + transaction_value;
+            if transaction_value.is_sign_positive() {
+                context.input_value += transaction_value;
+            }
+            if transaction_value.is_sign_negative() {
+                context.output_value += transaction_value;
+            }
+        }
+
         context.transactions.push(TransactionContext {
             transaction: transaction,
-            total: current,
+            total_units: current_units,
+            value: value.round_dp(2),
+            value_change: value_change.round_dp(2),
+            total_value: current_value.round_dp(2),
         });
-        current = next;
+
+        current_units = next_units;
+        current_value = next_value;
     }
+
+    context.input_value = context.input_value.round_dp(2);
+    context.output_value = context.output_value.round_dp(2);
 
     info.1.templates.render("position", &context)
 }
