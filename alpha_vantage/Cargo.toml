@@ -1,0 +1,7 @@
+[package]
+name = "alpha_vantage"
+version = "0.1.0"
+authors = ["Jeremy Soller <jackpot51@gmail.com>"]
+
+[dependencies]
+reqwest = "0.8.6"
