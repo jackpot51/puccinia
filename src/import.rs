@@ -5,8 +5,8 @@ use toml;
 
 use Config;
 use database::{establish_connection};
-use database::models::{Wallet, Account, Position, PositionTransaction, Transaction};
-use database::schema::{wallets, accounts, positions, position_transactions, transactions};
+use database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction};
+use database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions};
 
 pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
     let connection = establish_connection();
@@ -84,6 +84,21 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                             })
                             .execute(&connection)
                             .unwrap();
+                    }
+
+                    if let Ok(data) = puccinia.alpha_vantage.daily(&position.id, false) {
+                        for (time, point) in data.series {
+                            diesel::replace_into(position_prices::table)
+                                .values(&PositionPrice {
+                                    wallet_id: id.to_string(),
+                                    account_id: account.id.clone(),
+                                    position_id: position.id.clone(),
+                                    time: time,
+                                    price: point.close,
+                                })
+                                .execute(&connection)
+                                .unwrap();
+                        }
                     }
                 }
 
