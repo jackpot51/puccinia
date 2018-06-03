@@ -84,8 +84,8 @@
                 <tbody>
                     {{#each transactions}}
                         <tr>
-                            <td><a href="/transaction/time/{{transaction.time}}">{{transaction.time}}</a></td>
-                            <td><a href="/transaction/name/{{transaction.name}}">{{transaction.name}}</a></td>
+                            <td>{{transaction.time}}</td>
+                            <td>{{transaction.name}}</td>
                             <td align="right">{{transaction.units}}</td>
                             <td align="right">{{total_units}}</td>
                             <td align="right">{{transaction.price}}</td>
