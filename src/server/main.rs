@@ -1,6 +1,7 @@
 extern crate actix_web;
 extern crate diesel;
 extern crate handlebars;
+extern crate openssl;
 extern crate puccinia;
 extern crate rust_decimal;
 extern crate serde;
@@ -9,6 +10,7 @@ extern crate serde_derive;
 extern crate toml;
 
 use actix_web::{server::HttpServer, App, http::Method, fs::StaticFiles};
+use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use puccinia::database::ConnectionMutex;
 use puccinia::import::import;
 use std::env;
@@ -31,12 +33,17 @@ pub struct AppState {
 }
 
 fn main() {
+    let mut https = false;
     let mut config_tomls = Vec::new();
 
     for arg in env::args().skip(1) {
-        let mut data = String::new();
-        File::open(arg).unwrap().read_to_string(&mut data).unwrap();
-        config_tomls.push(data);
+        if arg == "--https" {
+            https = true;
+        } else {
+            let mut data = String::new();
+            File::open(arg).unwrap().read_to_string(&mut data).unwrap();
+            config_tomls.push(data);
+        }
     }
 
     if ! config_tomls.is_empty() {
@@ -56,13 +63,25 @@ fn main() {
             .handler("/static", StaticFiles::new("static").show_files_listing())
     };
 
-    // load ssl keys
-    // let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    // builder.set_private_key_file("key.pem", SslFiletype::PEM).unwrap();
-    // builder.set_certificate_chain_file("cert.pem").unwrap();
+    if https {
+        let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+        builder.set_private_key_file("secret.key", SslFiletype::PEM).unwrap();
+        builder.set_certificate_chain_file("secret.crt").unwrap();
 
-    HttpServer::new(main_app)
-        .bind("127.0.0.1:8080").unwrap()
-        // .server_ssl(builder).unwrap()
-        .run();
+        let address = "127.0.0.1:8443";
+
+        println!("launching at https://{}", address);
+
+        HttpServer::new(main_app)
+            .bind_ssl(address, builder).unwrap()
+            .run();
+    } else {
+        let address = "127.0.0.1:8080";
+
+        println!("launching at http://{}", address);
+
+        HttpServer::new(main_app)
+            .bind(address).unwrap()
+            .run();
+    }
 }

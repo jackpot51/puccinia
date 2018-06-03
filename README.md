@@ -53,3 +53,18 @@ Run `puccinia` without a path to simply used the cached information:
 ```
 cargo run --release
 ```
+
+## HTTPS
+
+To enable HTTPS, generate a key with `openssl`. To adjust the expiration time,
+add for example `-days 365`. To not require a password, add `-nodes`
+
+```
+openssl req -x509 -newkey rsa:4096 -keyout secret.key -out secret.crt
+```
+
+Run `puccinia` as above with an additional `--https` argument:
+
+```
+cargo run --release -- --https
+```
