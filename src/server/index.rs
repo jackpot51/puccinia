@@ -1,15 +1,15 @@
+use actix_web::{error, Responder, State};
 use diesel::prelude::*;
-use puccinia::database::ConnectionMutex;
 use puccinia::database::models::{Wallet, Account, Position};
 use puccinia::database::schema::{wallets, accounts, positions};
-use rocket::State;
-use rocket_contrib::Template;
 use rust_decimal::Decimal;
 use std::str::FromStr;
+use std::sync::Arc;
+use super::AppState;
 
-#[get("/")]
-pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, String> {
-    let connection = connection_mutex.lock().map_err(|err| format!("{}", err))?;
+pub fn index(state: State<Arc<AppState>>) -> impl Responder {
+    let connection = state.db.lock()
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     #[derive(Serialize)]
     struct WalletContext {
@@ -31,7 +31,7 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, Strin
     let wallets = wallets::table
         .order(wallets::id.asc())
         .load::<Wallet>(&*connection)
-        .map_err(|err| format!("{}", err))?;
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     for wallet in wallets {
         let mut total = Decimal::new(0, 0);
@@ -40,7 +40,7 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, Strin
             .filter(accounts::wallet_id.eq(&wallet.id))
             .order(accounts::id.asc())
             .load::<Account>(&*connection)
-            .map_err(|err| format!("{}", err))?;
+            .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
         for account in accounts {
             let positions = positions::table
@@ -48,7 +48,7 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, Strin
                 .filter(positions::account_id.eq(&account.id))
                 .order(positions::id.asc())
                 .load::<Position>(&*connection)
-                .map_err(|err| format!("{}", err))?;
+                .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
             for position in positions {
                 if let Ok(value) = Decimal::from_str(&position.value) {
@@ -66,5 +66,5 @@ pub fn index(connection_mutex: State<ConnectionMutex>) -> Result<Template, Strin
 
     context.total = context.total.round_dp(2);
 
-    Ok(Template::render("index", &context))
+    state.templates.render("index", &context)
 }
