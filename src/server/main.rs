@@ -43,8 +43,10 @@ fn main() {
         import(config_tomls.iter());
     }
 
-    let main_app = || {
-        App::with_state(Arc::new(AppState { db: ConnectionMutex::new(), templates: Templates::new() }))
+    let state = Arc::new(AppState { db: ConnectionMutex::new(), templates: Templates::new() });
+
+    let main_app = move || {
+        App::with_state(state.clone())
             .route("/", Method::GET, index::index)
             .route("/wallet/{id}", Method::GET, wallet::wallet)
             .route("/account/{wallet_id}/{id}", Method::GET, account::account)
