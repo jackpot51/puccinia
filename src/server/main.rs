@@ -53,7 +53,7 @@ fn main() {
             .route("/transaction/{key}/{value}", Method::GET, transaction::transaction)
             .route("/transaction", Method::GET, transaction::transaction_all)
             .route("/json", Method::GET, json::json)
-            .handler("/static", StaticFiles::new(".").show_files_listing())
+            .handler("/static", StaticFiles::new("static").show_files_listing())
     };
 
     // load ssl keys
