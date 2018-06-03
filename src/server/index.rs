@@ -1,4 +1,4 @@
-use actix_web::{error, http::StatusCode, HttpResponse, Responder, State};
+use actix_web::{error, Responder, State};
 use diesel::prelude::*;
 use puccinia::database::models::{Wallet, Account, Position};
 use puccinia::database::schema::{wallets, accounts, positions};
@@ -67,6 +67,4 @@ pub fn index(state: State<Arc<AppState>>) -> impl Responder {
     context.total = context.total.round_dp(2);
 
     state.templates.render("index", &context)
-        .map(|body| HttpResponse::with_body(StatusCode::OK, body))
-        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))
 }

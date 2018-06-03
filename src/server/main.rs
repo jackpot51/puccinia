@@ -3,12 +3,12 @@ extern crate diesel;
 extern crate handlebars;
 extern crate puccinia;
 extern crate rust_decimal;
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;
 
 use actix_web::{server::HttpServer, App, http::Method, fs::StaticFiles};
-use handlebars::Handlebars;
 use puccinia::database::ConnectionMutex;
 use puccinia::import::import;
 use std::env;
@@ -23,11 +23,11 @@ mod template;
 mod transaction;
 mod wallet;
 
-use template::create_templates;
+use template::Templates;
 
 pub struct AppState {
     pub db: ConnectionMutex,
-    pub templates: Handlebars,
+    pub templates: Templates
 }
 
 fn main() {
@@ -44,7 +44,7 @@ fn main() {
     }
 
     let main_app = || {
-        App::with_state(Arc::new(AppState { db: ConnectionMutex::new(), templates: create_templates() }))
+        App::with_state(Arc::new(AppState { db: ConnectionMutex::new(), templates: Templates::new() }))
             .route("/", Method::GET, index::index)
             .route("/wallet/{id}", Method::GET, wallet::wallet)
             .route("/account/{wallet_id}/{id}", Method::GET, account::account)

@@ -1,4 +1,4 @@
-use actix_web::{error, http::StatusCode, HttpResponse, Path, Responder, State};
+use actix_web::{error, Path, Responder, State};
 use diesel::prelude::*;
 use puccinia::database::models::{Wallet, Account, Position, Transaction};
 use puccinia::database::schema::{wallets, accounts, positions, transactions};
@@ -96,6 +96,4 @@ pub fn account(info: (Path<(String, String)>, State<Arc<AppState>>)) -> impl Res
     context.output = context.output.round_dp(2);
 
     info.1.templates.render("account", &context)
-        .map(|body| HttpResponse::with_body(StatusCode::OK, body))
-        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))
 }

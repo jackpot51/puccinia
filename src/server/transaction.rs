@@ -1,4 +1,4 @@
-use actix_web::{error, http::StatusCode, HttpResponse, Path, Responder, State};
+use actix_web::{error, Path, Responder, State};
 use diesel::prelude::*;
 use puccinia::database::models::Transaction;
 use puccinia::database::schema::transactions;
@@ -94,6 +94,4 @@ fn transaction_(state: State<Arc<AppState>>, key: String, value: String) -> impl
     context.output = context.output.round_dp(2);
 
     state.templates.render("transaction", &context)
-        .map(|body| HttpResponse::with_body(StatusCode::OK, body))
-        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))
 }
