@@ -25,8 +25,8 @@ The following is a list of current and future Puccinia features:
 - [x] Update data
   - [x] Periodic updates of positions
   - [x] Periodic updates of transactions
-  - [ ] Store position data history
-  - [ ] Store stock information seperate from position
+  - [x] Store position data history
+  - [ ] Store stock information separate from position
   - [ ] Automatically update data
 - [x] Visualize data
   - [x] Standard Tables
@@ -38,8 +38,8 @@ The following is a list of current and future Puccinia features:
     - [x] Transactions per Name
     - [ ] Define more sub-items
   - [x] Charts
-    - [x] Scatter chart of Transactions over Time (Cash Flow)
-    - [x] Line graph of Transaction Total over Time (Net Cash Flow)
+    - [x] Scatter chart of Cash Flow
+    - [x] Line graph of Net Cash Flow
     - [ ] Line graph of position value. Requires history of positions.
     - [ ] Line graph of account value. Requires history of positions.
     - [ ] Line graph of wallet value. Requires history of positions.
