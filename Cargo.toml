@@ -26,7 +26,7 @@ features = ["sqlite"]
 
 [dependencies.actix-web]
 version = "0.6"
-features = ["tls"]
+features = ["alpn"]
 
 [dependencies.xml-rs]
 version = "0.7"
