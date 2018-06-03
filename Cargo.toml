@@ -25,7 +25,7 @@ version = "0.1"
 path = "alpha_vantage"
 
 [dependencies.actix-web]
-version = "0.6"
+version = "0.6.10"
 features = ["alpn"]
 
 [dependencies.diesel]
