@@ -11,6 +11,9 @@ function download(callback) {
 }
 
 function chart(element, type, title, data) {
+    element.onclick = function() {
+        console.log(data);
+    };
     var context = element.getContext('2d');
     var chart = new Chart(context, {
         type: type,
