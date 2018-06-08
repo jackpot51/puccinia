@@ -1,4 +1,4 @@
-use chrono::{Utc, TimeZone};
+use chrono::{Duration, Utc, TimeZone};
 use diesel;
 use diesel::prelude::*;
 use toml;
@@ -87,26 +87,44 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     }
 
                     if position.id != "balance" {
-                        //TODO: Adjust for throttling, only call if no up to date price
-                        println!("downloading prices for {}", position.id);
-                        match puccinia.alpha_vantage.daily(&position.id, false) {
-                            Ok(data) => {
-                                println!("downloaded {} prices for {}", data.series.len(), position.id);
-                                for (time, point) in data.series {
-                                    diesel::replace_into(position_prices::table)
-                                        .values(&PositionPrice {
-                                            wallet_id: id.to_string(),
-                                            account_id: account.id.clone(),
-                                            position_id: position.id.clone(),
-                                            time: time,
-                                            price: point.close,
-                                        })
-                                        .execute(&connection)
-                                        .unwrap();
-                                }
+                        println!("{}: checking cached prices", position.id);
+
+                        let yesterday = Utc::today() - Duration::days(1);
+                        let time = format!("{}", yesterday.format("%Y-%m-%d"));
+                        let download = match position_prices::table
+                            .find((&id, &account.id, &position.id, &time))
+                            .first::<PositionPrice>(&connection) {
+                            Ok(price) => {
+                                println!("{}: found cached price on {}", position.id, price.time);
+                                false
                             },
                             Err(err) => {
-                                println!("failed to download prices for {}: {}", position.id, err);
+                                println!("{}: failed to find cached price: {}", position.id, err);
+                                true
+                            }
+                        };
+
+                        if download {
+                            println!("{}: downloading prices", position.id);
+                            match puccinia.alpha_vantage.daily(&position.id, false) {
+                                Ok(data) => {
+                                    println!("{}: downloaded {} prices", position.id, data.series.len());
+                                    for (time, point) in data.series {
+                                        diesel::replace_into(position_prices::table)
+                                            .values(&PositionPrice {
+                                                wallet_id: id.to_string(),
+                                                account_id: account.id.clone(),
+                                                position_id: position.id.clone(),
+                                                time: time,
+                                                price: point.close,
+                                            })
+                                            .execute(&connection)
+                                            .unwrap();
+                                    }
+                                },
+                                Err(err) => {
+                                    println!("{}: failed to download prices: {}", position.id, err);
+                                }
                             }
                         }
                     }
