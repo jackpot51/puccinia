@@ -1,4 +1,4 @@
-use chrono::{Duration, Utc, TimeZone};
+use chrono::{Duration, Local, TimeZone};
 use diesel;
 use diesel::prelude::*;
 use toml;
@@ -51,8 +51,8 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     .execute(&connection)
                     .unwrap();
 
-                let start = Utc.ymd(2017, 1, 1);
-                let end = Utc::today();
+                let start = Local.ymd(2017, 1, 1);
+                let end = Local::today();
                 let statement = bank.statement(&account, Some(start), Some(end)).unwrap();
 
                 for position in statement.positions {
@@ -89,7 +89,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     if position.id != "balance" {
                         println!("{}: checking cached prices", position.id);
 
-                        let yesterday = Utc::today() - Duration::days(1);
+                        let yesterday = Local::today() - Duration::days(1);
                         let time = format!("{}", yesterday.format("%Y-%m-%d"));
                         let download = match position_prices::table
                             .find((&id, &account.id, &position.id, &time))

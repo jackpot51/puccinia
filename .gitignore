@@ -1,3 +1,4 @@
+/.buildconfig
 /target/
 **/*.rs.bk
 secret.*
