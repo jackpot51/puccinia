@@ -4,6 +4,10 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use std::sync::Mutex;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+
 pub use daily::{Daily, DailyPoint};
 pub use daily_adjusted::{DailyAdjusted, DailyAdjustedPoint};
 pub use weekly::{Weekly, WeeklyPoint};
@@ -25,16 +29,47 @@ pub (crate) fn err_str<E: ::std::fmt::Display>(err: E) -> String {
 
 pub struct AlphaVantage {
     apikey: String,
+    query_interval: Duration,
+    query_time: Mutex<Option<Instant>>,
 }
 
 impl AlphaVantage {
     pub fn new(apikey: &str) -> Self {
         Self {
-            apikey: apikey.to_string()
+            apikey: apikey.to_string(),
+            query_interval: Duration::new(2, 0),
+            query_time: Mutex::new(None),
+        }
+    }
+
+    fn query_wait(&self) {
+        let wait_time_opt = {
+            let query_time_opt = self.query_time.lock().unwrap();
+            if let Some(query_time) = *query_time_opt {
+                let elapsed = query_time.elapsed();
+                if elapsed < self.query_interval {
+                    Some(self.query_interval - elapsed)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        };
+
+        if let Some(wait_time) = wait_time_opt {
+            sleep(wait_time);
+        }
+
+        {
+            let mut query_time_opt = self.query_time.lock().unwrap();
+            *query_time_opt = Some(Instant::now());
         }
     }
 
     pub fn query<'a>(&'a self, function: &'a str) -> QueryBuilder<'a> {
+        self.query_wait();
+
         QueryBuilder {
             apikey: &self.apikey,
             function: function,
