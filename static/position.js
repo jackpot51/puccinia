@@ -39,6 +39,15 @@ function generate(response, wallet_id, account_id, position_id) {
 }
 
 function onload(wallet_id, account_id, position_id) {
+    chart_divs(document.getElementById("charts"), [
+        "chart_price",
+        "chart_value",
+        "chart_change_in_shares",
+        "chart_total_shares",
+        "chart_cash_flow",
+        "chart_net_cash_flow",
+    ]);
+
     download(function(response) {
         generate(response, wallet_id, account_id, position_id);
     });

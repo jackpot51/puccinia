@@ -25,6 +25,13 @@ function generate(response, wallet_id, account_id) {
 }
 
 function onload(wallet_id, account_id) {
+    chart_divs(document.getElementById("charts"), [
+        "chart_change_in_value",
+        "chart_value",
+        "chart_cash_flow",
+        "chart_net_cash_flow",
+    ]);
+
     download(function(response) {
         generate(response, wallet_id, account_id);
     });

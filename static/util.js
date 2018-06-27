@@ -1,3 +1,7 @@
+function child(parent, tag) {
+    return parent.appendChild(document.createElement(tag));
+}
+
 function download(callback) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -10,17 +14,39 @@ function download(callback) {
     xhttp.send();
 }
 
+function chart_divs(element, ids) {
+    var deck = null;
+    for (i in ids) {
+        if (i % 2 == 0) {
+            deck = child(element, "div");
+            deck.classList.add("card-deck");
+        }
+
+        var card = child(deck, "div");
+        card.classList.add("card");
+        card.style.marginTop = "15px";
+        card.style.marginBottom = "15px";
+
+        var card_body = child(card, "div");
+        card_body.classList.add("card-body");
+
+        var canvas = child(card_body, "canvas");
+        canvas.id = ids[i];
+        canvas.setAttribute("width", 300);
+        canvas.setAttribute("height", 300);
+    }
+}
+
 function chart(element, type, title, data) {
     element.onclick = function() {
         console.log(data);
     };
-    var context = element.getContext('2d');
-    var chart = new Chart(context, {
+    return new Chart(element.getContext('2d'), {
         type: type,
         data: {
             datasets: [{
                 label: title,
-                data: data
+                data: data.slice()
             }]
         },
         options: {
