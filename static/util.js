@@ -37,10 +37,23 @@ function chart_divs(element, ids) {
     }
 }
 
-function chart(element, type, title, data) {
-    element.onclick = function() {
-        console.log(data);
-    };
+function chart(element, type, title, data, fullscreen = false) {
+    var maintainAspectRatio = true;
+    if (fullscreen) {
+        element.onclick = function() {
+            console.log(data);
+        };
+        maintainAspectRatio = false;
+    } else {
+        element.onclick = function() {
+            var chart_window = window.open("/static/chart.html");
+            chart_window.chart_data = {
+                "type": type,
+                "title": title,
+                "data": data
+            };
+        };
+    }
     return new Chart(element.getContext('2d'), {
         type: type,
         data: {
@@ -51,6 +64,7 @@ function chart(element, type, title, data) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: maintainAspectRatio,
             scales: {
                 xAxes: [{
                     type: 'time',

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            height: 100%;
+        }
+
+        #canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        </style>
+
+        <title>puccinia</title>
+    </head>
+    <body onload="onload()">
+        <canvas id="canvas"></canvas>
+
+        <script src="/static/thirdparty/chart.js"></script>
+        <script src="/static/thirdparty/moment.js"></script>
+        <script src="/static/util.js"></script>
+        <script>
+        function onload() {
+            var data = window.chart_data;
+            var canvas = document.getElementById('canvas');
+            chart(canvas, data.type, data.title, data.data, true);
+        }
+        </script>
+    </body>
+</html>
