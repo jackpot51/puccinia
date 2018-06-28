@@ -16,7 +16,7 @@ function download(callback) {
 
 function chart_divs(element, ids) {
     var deck = null;
-    for (i in ids) {
+    for (var i in ids) {
         if (i % 2 == 0) {
             deck = child(element, "div");
             deck.classList.add("card-deck");
@@ -41,7 +41,11 @@ function chart(element, type, title, data, fullscreen = false) {
     var maintainAspectRatio = true;
     if (fullscreen) {
         element.onclick = function() {
-            console.log(data);
+            var table_window = window.open("/static/table.html");
+            table_window.table_data = {
+                "title": title,
+                "data": data
+            };
         };
         maintainAspectRatio = false;
     } else {

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" href="/static/thirdparty/bootstrap.css">
+        <link rel="stylesheet" href="/static/style.css">
+
+        <title>puccinia</title>
+    </head>
+    <body class="container" onload="onload()">
+        <h4 id="title"></h4>
+        <table id="table"></table>
+
+        <script src="/static/thirdparty/chart.js"></script>
+        <script src="/static/thirdparty/moment.js"></script>
+        <script src="/static/util.js"></script>
+        <script>
+        function onload() {
+            var data = window.table_data;
+
+            document.getElementById('title').innerText = data.title;
+
+            var table = document.getElementById('table');
+            table.classList.add('table', 'table-bordered', 'table-hover');
+
+            var thead = child(table, 'thead');
+
+            var row = child(thead, 'tr');
+
+            var cell = child(row, 'th');
+            cell.innerText = 'x';
+
+            cell = child(row, 'th');
+            cell.innerText = 'y';
+
+            var tbody = child(table, 'tbody');
+
+            for (var i in data.data) {
+                var point = data.data[i];
+
+                row = child(thead, 'tr');
+
+                cell = child(row, 'td');
+                cell.innerText = point.title;
+
+                cell = child(row, 'td');
+                cell.innerText = point.y;
+            }
+        }
+        </script>
+    </body>
+</html>
