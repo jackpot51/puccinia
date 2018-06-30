@@ -14,6 +14,7 @@ pub use weekly::{Weekly, WeeklyPoint};
 pub use weekly_adjusted::{WeeklyAdjusted, WeeklyAdjustedPoint};
 pub use monthly::{Monthly, MonthlyPoint};
 pub use monthly_adjusted::{MonthlyAdjusted, MonthlyAdjustedPoint};
+pub use crypto_daily::{CryptoDaily, CryptoDailyPoint};
 
 mod daily;
 mod daily_adjusted;
@@ -21,6 +22,7 @@ mod weekly;
 mod weekly_adjusted;
 mod monthly;
 mod monthly_adjusted;
+mod crypto_daily;
 
 // Helper function for errors
 pub (crate) fn err_str<E: ::std::fmt::Display>(err: E) -> String {
@@ -162,6 +164,18 @@ impl AlphaVantage {
         if full {
             query = query.param("outputsize", "full");
         }
+
+        let json = query.build().json().map_err(err_str)?;
+
+        serde_json::from_str(&json).map_err(|err| {
+            format!("{}: {}", err, json)
+        })
+    }
+
+    pub fn crypto_daily(&self, symbol: &str) -> Result<CryptoDaily, String> {
+        let query = self.query("DIGITAL_CURRENCY_DAILY")
+            .param("symbol", symbol)
+            .param("market", "USD");
 
         let json = query.build().json().map_err(err_str)?;
 

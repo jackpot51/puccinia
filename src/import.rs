@@ -180,6 +180,47 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                 })
                 .execute(&connection)
                 .unwrap();
+
+            println!("{}: checking cached prices", kind);
+
+            let yesterday = Utc::today() - Duration::days(1);
+            let time = format!("{}", yesterday.format("%Y-%m-%d"));
+            let download = match position_prices::table
+                .find((&id, &address, &kind, &time))
+                .first::<PositionPrice>(&connection) {
+                Ok(price) => {
+                    println!("{}: found cached price on {}", kind, price.time);
+                    false
+                },
+                Err(err) => {
+                    println!("{}: failed to find cached price: {}", kind, err);
+                    true
+                }
+            };
+
+            if download {
+                println!("{}: downloading prices", kind);
+                match puccinia.alpha_vantage.crypto_daily(&kind) {
+                    Ok(data) => {
+                        println!("{}: downloaded {} prices", kind, data.series.len());
+                        for (time, point) in data.series {
+                            diesel::replace_into(position_prices::table)
+                                .values(&PositionPrice {
+                                    wallet_id: id.to_string(),
+                                    account_id: address.to_string(),
+                                    position_id: kind.to_string(),
+                                    time: time,
+                                    price: point.close,
+                                })
+                                .execute(&connection)
+                                .unwrap();
+                        }
+                    },
+                    Err(err) => {
+                        println!("{}: failed to download prices: {}", kind, err);
+                    }
+                }
+            }
         }
 
         for (id, custom) in &puccinia.custom {
