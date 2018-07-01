@@ -1,4 +1,4 @@
-use chrono::{Duration, Local, TimeZone};
+use chrono::{Duration, Local, TimeZone, Utc};
 use diesel;
 use diesel::prelude::*;
 use toml;
@@ -51,8 +51,8 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     .execute(&connection)
                     .unwrap();
 
-                let start = Local.ymd(2017, 1, 1);
-                let end = Local::today();
+                let start = Utc.ymd(2017, 1, 1);
+                let end = Utc::today();
                 let statement = bank.statement(&account, Some(start), Some(end)).unwrap();
 
                 for position in statement.positions {
