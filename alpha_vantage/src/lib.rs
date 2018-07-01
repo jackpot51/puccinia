@@ -45,22 +45,26 @@ impl AlphaVantage {
     }
 
     fn query_wait(&self) {
-        let wait_time_opt = {
-            let query_time_opt = self.query_time.lock().unwrap();
-            if let Some(query_time) = *query_time_opt {
-                let elapsed = query_time.elapsed();
-                if elapsed < self.query_interval {
-                    Some(self.query_interval - elapsed)
+        for _i in 0..10 {
+            let wait_time_opt = {
+                let query_time_opt = self.query_time.lock().unwrap();
+                if let Some(query_time) = *query_time_opt {
+                    let elapsed = query_time.elapsed();
+                    if elapsed < self.query_interval {
+                        Some(self.query_interval - elapsed)
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
-            } else {
-                None
-            }
-        };
+            };
 
-        if let Some(wait_time) = wait_time_opt {
-            sleep(wait_time);
+            if let Some(wait_time) = wait_time_opt {
+                sleep(wait_time);
+            } else {
+                break;
+            }
         }
 
         {

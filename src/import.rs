@@ -1,4 +1,4 @@
-use chrono::{Duration, TimeZone, Utc};
+use chrono::{Duration, Local, TimeZone};
 use diesel;
 use diesel::prelude::*;
 use toml;
@@ -51,8 +51,8 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     .execute(&connection)
                     .unwrap();
 
-                let start = Utc.ymd(2017, 1, 1);
-                let end = Utc::today();
+                let start = Local.ymd(2017, 1, 1);
+                let end = Local::today();
                 let statement = bank.statement(&account, Some(start), Some(end)).unwrap();
 
                 for position in statement.positions {
@@ -89,7 +89,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     if position.id != "balance" {
                         println!("{}: checking cached prices", position.id);
 
-                        let yesterday = Utc::today() - Duration::days(1);
+                        let yesterday = Local::today() - Duration::days(1);
                         let time = format!("{}", yesterday.format("%Y-%m-%d"));
                         let download = match position_prices::table
                             .find((&id, &account.id, &position.id, &time))
@@ -99,7 +99,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                                 false
                             },
                             Err(err) => {
-                                println!("{}: failed to find cached price: {}", position.id, err);
+                                println!("{}: failed to find cached price on {}: {}", position.id, time, err);
                                 true
                             }
                         };
@@ -183,7 +183,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
 
             println!("{}: checking cached prices", kind);
 
-            let yesterday = Utc::today() - Duration::days(1);
+            let yesterday = Local::today() - Duration::days(1);
             let time = format!("{}", yesterday.format("%Y-%m-%d"));
             let download = match position_prices::table
                 .find((&id, &address, &kind, &time))
@@ -193,16 +193,21 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     false
                 },
                 Err(err) => {
-                    println!("{}: failed to find cached price: {}", kind, err);
+                    println!("{}: failed to find cached price on {}: {}", kind, time, err);
                     true
                 }
             };
 
             if download {
-                println!("{}: downloading prices", kind);
-                match puccinia.alpha_vantage.crypto_daily(&kind) {
+                let av_kind = match kind {
+                    "bitcoin" => "BTC",
+                    other => other
+                };
+
+                println!("{}: downloading prices", av_kind);
+                match puccinia.alpha_vantage.crypto_daily(&av_kind) {
                     Ok(data) => {
-                        println!("{}: downloaded {} prices", kind, data.series.len());
+                        println!("{}: downloaded {} prices", av_kind, data.series.len());
                         for (time, point) in data.series {
                             diesel::replace_into(position_prices::table)
                                 .values(&PositionPrice {
@@ -217,7 +222,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                         }
                     },
                     Err(err) => {
-                        println!("{}: failed to download prices: {}", kind, err);
+                        println!("{}: failed to download prices: {}", av_kind, err);
                     }
                 }
             }
