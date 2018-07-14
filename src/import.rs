@@ -1,4 +1,4 @@
-use chrono::{Duration, TimeZone, Utc};
+use chrono::{Duration, Local, TimeZone, Utc};
 use diesel;
 use diesel::prelude::*;
 use toml;
@@ -89,7 +89,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     if position.id != "balance" {
                         println!("{}: checking cached prices", position.id);
 
-                        let yesterday = Utc::today() - Duration::days(1);
+                        let yesterday = Local::today() - Duration::days(1);
                         let time = format!("{}", yesterday.format("%Y-%m-%d"));
                         let download = match position_prices::table
                             .find((&id, &account.id, &position.id, &time))
@@ -99,7 +99,7 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                                 false
                             },
                             Err(err) => {
-                                println!("{}: failed to find cached price: {}", position.id, err);
+                                println!("{}: failed to find cached price on {}: {}", position.id, time, err);
                                 true
                             }
                         };
@@ -180,6 +180,52 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                 })
                 .execute(&connection)
                 .unwrap();
+
+            println!("{}: checking cached prices", kind);
+
+            let yesterday = Local::today() - Duration::days(1);
+            let time = format!("{}", yesterday.format("%Y-%m-%d"));
+            let download = match position_prices::table
+                .find((&id, &address, &kind, &time))
+                .first::<PositionPrice>(&connection) {
+                Ok(price) => {
+                    println!("{}: found cached price on {}", kind, price.time);
+                    false
+                },
+                Err(err) => {
+                    println!("{}: failed to find cached price on {}: {}", kind, time, err);
+                    true
+                }
+            };
+
+            if download {
+                let av_kind = match kind {
+                    "bitcoin" => "BTC",
+                    other => other
+                };
+
+                println!("{}: downloading prices", av_kind);
+                match puccinia.alpha_vantage.crypto_daily(&av_kind) {
+                    Ok(data) => {
+                        println!("{}: downloaded {} prices", av_kind, data.series.len());
+                        for (time, point) in data.series {
+                            diesel::replace_into(position_prices::table)
+                                .values(&PositionPrice {
+                                    wallet_id: id.to_string(),
+                                    account_id: address.to_string(),
+                                    position_id: kind.to_string(),
+                                    time: time,
+                                    price: point.close,
+                                })
+                                .execute(&connection)
+                                .unwrap();
+                        }
+                    },
+                    Err(err) => {
+                        println!("{}: failed to download prices: {}", av_kind, err);
+                    }
+                }
+            }
         }
 
         for (id, custom) in &puccinia.custom {
