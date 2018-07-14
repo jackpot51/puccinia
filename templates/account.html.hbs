@@ -28,7 +28,10 @@
                 <tbody>
                     {{#each positions}}
                         <tr>
-                            <td><a href="/position/{{../wallet.id}}/{{../account.id}}/{{id}}">{{id}}</a></td>
+                            <td>
+                                <input type="checkbox" id="checkbox_position_id_{{id}}" onchange="refresh('{{../wallet.id}}', '{{../account.id}}')" checked/>
+                                <a href="/position/{{../wallet.id}}/{{../account.id}}/{{id}}">{{id}}</a>
+                            </td>
                             <td>{{name}}</td>
                             <td align="right">{{units}}</td>
                             <td align="right">{{price}}</td>

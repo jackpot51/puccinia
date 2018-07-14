@@ -38,6 +38,12 @@ function generate(response, wallet_id, account_id, position_id) {
     chart(document.getElementById("chart_net_cash_flow"), 'line', 'Net Cash Flow', net_cash_flow(transactions, "value"));
 }
 
+function refresh(wallet_id, account_id, position_id) {
+    download(function(response) {
+        generate(response, wallet_id, account_id, position_id);
+    });
+}
+
 function onload(wallet_id, account_id, position_id) {
     chart_divs(document.getElementById("charts"), [
         "chart_price",
@@ -48,7 +54,5 @@ function onload(wallet_id, account_id, position_id) {
         "chart_net_cash_flow",
     ]);
 
-    download(function(response) {
-        generate(response, wallet_id, account_id, position_id);
-    });
+    refresh(wallet_id, account_id, position_id);
 }

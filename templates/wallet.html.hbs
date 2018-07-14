@@ -22,7 +22,10 @@
                 <tbody>
                     {{#each accounts}}
                         <tr>
-                            <td><a href="/account/{{../wallet.id}}/{{account.id}}">{{account.name}}</a></td>
+                            <td>
+                                <input type="checkbox" id="checkbox_account_id_{{account.id}}" onchange="refresh('{{../wallet.id}}')" checked/>
+                                <a href="/account/{{../wallet.id}}/{{account.id}}">{{account.name}}</a>
+                            </td>
                             <td align="right">{{total}}</td>
                         </tr>
                     {{/each}}

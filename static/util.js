@@ -2,6 +2,13 @@ function child(parent, tag) {
     return parent.appendChild(document.createElement(tag));
 }
 
+function checkbox_filter(key) {
+    return function(item) {
+        var element = document.getElementById('checkbox_' + key + '_' + item[key]);
+        return element && element.checked;
+    }
+}
+
 function download(callback) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {

@@ -1,15 +1,16 @@
 function generate(response, wallet_id) {
+    var filter = checkbox_filter("account_id");
     var positions = response.positions.filter(function(position) {
-        return position.wallet_id == wallet_id;
+        return position.wallet_id == wallet_id && filter(position);
     });
     var position_transactions = response.position_transactions.filter(function(transaction) {
-        return transaction.wallet_id == wallet_id;
+        return transaction.wallet_id == wallet_id && filter(transaction);
     });
     var prices = response.position_prices.filter(function(price) {
-        return price.wallet_id == wallet_id;
+        return price.wallet_id == wallet_id && filter(price);
     });
     var transactions = response.transactions.filter(function(transaction) {
-        return transaction.wallet_id == wallet_id;
+        return transaction.wallet_id == wallet_id && filter(transaction);
     });
 
     convert_transactions(transactions, position_transactions);
@@ -20,6 +21,12 @@ function generate(response, wallet_id) {
     chart(document.getElementById("chart_net_cash_flow"), 'line', 'Net Cash Flow', net_cash_flow(transactions));
 }
 
+function refresh(wallet_id) {
+    download(function(response) {
+        generate(response, wallet_id);
+    });
+}
+
 function onload(wallet_id) {
     chart_divs(document.getElementById("charts"), [
         "chart_change_in_value",
@@ -28,7 +35,5 @@ function onload(wallet_id) {
         "chart_net_cash_flow",
     ]);
 
-    download(function(response) {
-        generate(response, wallet_id);
-    });
+    refresh(wallet_id);
 }
