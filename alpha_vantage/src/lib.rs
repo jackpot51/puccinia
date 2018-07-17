@@ -39,7 +39,7 @@ impl AlphaVantage {
     pub fn new(apikey: &str) -> Self {
         Self {
             apikey: apikey.to_string(),
-            query_interval: Duration::new(2, 0),
+            query_interval: Duration::new(15, 0),
             query_time: Mutex::new(None),
         }
     }
