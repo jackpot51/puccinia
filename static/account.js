@@ -18,7 +18,7 @@ function generate(response, wallet_id, account_id) {
     var transactions = response.transactions.filter(function(transaction) {
         return transaction.wallet_id == wallet_id
             && transaction.account_id == account_id
-            && filter(transaction);
+            && filter({ "position_id": "balance" });
     });
 
     convert_transactions(transactions, position_transactions);
