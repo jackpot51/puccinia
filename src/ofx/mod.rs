@@ -1,6 +1,6 @@
 use chrono::{Date, TimeZone, Utc};
-use reqwest::{Body, Client, StatusCode};
-use reqwest::header::{Accept, Connection, ConnectionOption, ContentType, UserAgent};
+use reqwest::{Body, Client};
+use reqwest::header::{ACCEPT, CONNECTION, CONTENT_TYPE, USER_AGENT};
 use std::str;
 use std::io::Read;
 
@@ -116,10 +116,10 @@ pub trait Ofx {
 
         let mut response = client
             .post(request.url)
-            .header(Accept(vec!["application/ofx".parse().unwrap()]))
-            .header(Connection(vec![ConnectionOption::Close]))
-            .header(ContentType("application/x-ofx".parse().unwrap()))
-            .header(UserAgent::new("puccinia".to_string()))
+            .header(ACCEPT, "application/ofx")
+            .header(CONNECTION, "close")
+            .header(CONTENT_TYPE, "application/x-ofx")
+            .header(USER_AGENT, "puccinia")
             .body(Body::from(request_data))
             .send().map_err(err_str)?;
 
@@ -127,13 +127,10 @@ pub trait Ofx {
         response.read_to_end(&mut response_data).map_err(err_str)?;
         println!("Response: [\n{}\n]", str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]"));
 
-        match response.status() {
-            StatusCode::Ok => {
-                Ok(Response::decode(&response_data).map_err(err_str)?)
-            },
-            _ => {
-                Err(format!("error code {}\n{}", response.status(), str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")))
-            }
+        if response.status().is_success() {
+            Ok(Response::decode(&response_data).map_err(err_str)?)
+        } else {
+            Err(format!("error code {}\n{}", response.status(), str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")))
         }
     }
 }
