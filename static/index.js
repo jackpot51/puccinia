@@ -1,9 +1,21 @@
 function generate(response) {
+    var since = document.getElementById("chart_since").value;
     var filter = checkbox_filter("wallet_id");
+    var time_filter = function(item) {
+        if (!filter(item)){
+            return false;
+        }
+
+        if (since && since >= item.time) {
+            return false;
+        }
+
+        return true;
+    };
     var positions = response.positions.filter(filter);
-    var position_transactions = response.position_transactions.filter(filter);
-    var prices = response.position_prices.filter(filter);
-    var transactions = response.transactions.filter(filter);
+    var position_transactions = response.position_transactions.filter(time_filter);
+    var prices = response.position_prices.filter(time_filter);
+    var transactions = response.transactions.filter(time_filter);
 
     convert_transactions(transactions, position_transactions);
 
