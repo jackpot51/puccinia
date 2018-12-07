@@ -45,6 +45,11 @@ function chart_divs(element, ids) {
 }
 
 function chart(element, type, title, data, fullscreen = false) {
+    if (element.chart) {
+        element.chart.destroy();
+        delete element.chart;
+    }
+
     var maintainAspectRatio = true;
     if (fullscreen) {
         element.onclick = function() {
@@ -65,7 +70,8 @@ function chart(element, type, title, data, fullscreen = false) {
             };
         };
     }
-    return new Chart(element.getContext('2d'), {
+
+    element.chart = new Chart(element.getContext('2d'), {
         type: type,
         data: {
             datasets: [{
@@ -107,6 +113,8 @@ function chart(element, type, title, data, fullscreen = false) {
             }
         }
     });
+
+    return element.chart;
 }
 
 function convert_transactions(transactions, position_transactions) {
