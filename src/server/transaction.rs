@@ -1,4 +1,4 @@
-use actix_web::{error, Path, Responder, State};
+use actix_web::{error, web::Path, Responder, web::Data};
 use diesel::prelude::*;
 use puccinia::database::models::Transaction;
 use puccinia::database::schema::transactions;
@@ -7,17 +7,17 @@ use std::str::FromStr;
 use std::sync::Arc;
 use super::AppState;
 
-pub fn transaction_all(state: State<Arc<AppState>>) -> impl Responder {
+pub fn transaction_all(state: Data<Arc<AppState>>) -> impl Responder {
     transaction_(state, String::new(), String::new())
 }
 
-pub fn transaction(info: (Path<(String, String)>, State<Arc<AppState>>)) -> impl Responder {
+pub fn transaction(info: (Path<(String, String)>, Data<Arc<AppState>>)) -> impl Responder {
     let path = info.0.into_inner();
     transaction_(info.1, path.0, path.1)
 }
 
-fn transaction_(state: State<Arc<AppState>>, key: String, value: String) -> impl Responder {
-    let connection = state.db.lock().map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;;
+fn transaction_(state: Data<Arc<AppState>>, key: String, value: String) -> impl Responder {
+    let connection = state.db.lock().map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
     #[derive(Serialize)]
     struct TransactionContext {

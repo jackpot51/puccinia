@@ -40,7 +40,7 @@ impl Templates {
 
     pub fn render<T: Serialize>(&self, name: &str, context: &T) -> Result<HttpResponse, Error> {
         self.0.render(name, context)
-            .map(|body| HttpResponse::with_body(StatusCode::OK, body))
+            .map(|body| HttpResponse::with_body(StatusCode::OK, body.into()))
             .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))
     }
 }

@@ -1,3 +1,4 @@
+extern crate actix_files;
 extern crate actix_web;
 extern crate diesel;
 extern crate handlebars;
@@ -9,7 +10,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate toml;
 
-use actix_web::{server::HttpServer, App, http::Method, fs::StaticFiles};
+use actix_files::Files;
+use actix_web::{HttpServer, App, web};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use puccinia::database::ConnectionMutex;
 use puccinia::import::import;
@@ -54,15 +56,16 @@ fn main() {
     let state = Arc::new(AppState { db: ConnectionMutex::new(), templates: Templates::new() });
 
     let main_app = move || {
-        App::with_state(state.clone())
-            .route("/", Method::GET, index::index)
-            .route("/wallet/{id}", Method::GET, wallet::wallet)
-            .route("/account/{wallet_id}/{id}", Method::GET, account::account)
-            .route("/position/{wallet_id}/{account_id}/{id}", Method::GET, position::position)
-            .route("/transaction/{key}/{value}", Method::GET, transaction::transaction)
-            .route("/transaction", Method::GET, transaction::transaction_all)
-            .route("/json", Method::GET, json::json)
-            .handler("/static", StaticFiles::new("static").show_files_listing())
+        App::new()
+            .data(state.clone())
+            .route("/", web::get().to(index::index))
+            .route("/wallet/{id}", web::get().to(wallet::wallet))
+            .route("/account/{wallet_id}/{id}", web::get().to(account::account))
+            .route("/position/{wallet_id}/{account_id}/{id}", web::get().to(position::position))
+            .route("/transaction/{key}/{value}", web::get().to(transaction::transaction))
+            .route("/transaction", web::get().to(transaction::transaction_all))
+            .route("/json", web::get().to(json::json))
+            .service(Files::new("/static", "static").show_files_listing())
     };
 
     if https {
@@ -75,7 +78,7 @@ fn main() {
         println!("launching at https://{}", address);
 
         HttpServer::new(main_app)
-            .bind_ssl(address, builder).unwrap()
+            //TODO .bind_ssl(address, builder).unwrap()
             .run();
     } else {
         let address = "127.0.0.1:8080";

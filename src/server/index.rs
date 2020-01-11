@@ -1,4 +1,4 @@
-use actix_web::{error, Responder, State};
+use actix_web::{error, Responder, web::Data};
 use diesel::prelude::*;
 use puccinia::database::models::{Wallet, Account, Position};
 use puccinia::database::schema::{wallets, accounts, positions};
@@ -7,7 +7,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use super::AppState;
 
-pub fn index(state: State<Arc<AppState>>) -> impl Responder {
+pub fn index(state: Data<Arc<AppState>>) -> impl Responder {
     let connection = state.db.lock()
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 

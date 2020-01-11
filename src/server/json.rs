@@ -1,4 +1,4 @@
-use actix_web::{error, Error, Json, State};
+use actix_web::{error, Error, web::Json, web::Data};
 use diesel::prelude::*;
 use puccinia::database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction};
 use puccinia::database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions};
@@ -15,7 +15,7 @@ pub struct JsonDump {
     transactions: Vec<Transaction>,
 }
 
-pub fn json(state: State<Arc<AppState>>) -> Result<Json<JsonDump>, Error> {
+pub fn json(state: Data<Arc<AppState>>) -> Result<Json<JsonDump>, Error> {
     let connection = state.db.lock()
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
