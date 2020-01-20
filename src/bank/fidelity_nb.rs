@@ -28,8 +28,8 @@ impl Bank for FidelityNb {
         &self.name
     }
 
-    fn as_ofx<'a>(&'a self) -> Option<&'a Ofx> {
-        Some(self as &Ofx)
+    fn as_ofx<'a>(&'a self) -> Option<&'a dyn Ofx> {
+        Some(self as &dyn Ofx)
     }
 
     fn accounts(&self) -> Result<Vec<BankAccount>, String> {

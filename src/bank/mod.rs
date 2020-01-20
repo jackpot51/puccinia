@@ -30,7 +30,7 @@ pub struct BankConfig {
 }
 
 impl BankConfig {
-    pub fn build(self) -> Result<Box<Bank>, String> {
+    pub fn build(self) -> Result<Box<dyn Bank>, String> {
         match self.kind.as_str() {
             "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
             "fidelity" => Ok(Box::new(Fidelity::new(self.name, self.username, self.password, self.accounts))),
@@ -84,7 +84,7 @@ pub trait Bank: Send + Sync {
     fn kind(&self) -> &str;
     fn name(&self) -> &str;
 
-    fn as_ofx<'a>(&'a self) -> Option<&'a Ofx> { None }
+    fn as_ofx<'a>(&'a self) -> Option<&'a dyn Ofx> { None }
 
     fn accounts(&self) -> Result<Vec<BankAccount>, String>;
 

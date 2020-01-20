@@ -20,7 +20,7 @@ pub struct CryptoConfig {
 }
 
 impl CryptoConfig {
-    pub fn build(self) -> Result<Box<Crypto>, String> {
+    pub fn build(self) -> Result<Box<dyn Crypto>, String> {
         match self.kind.as_str() {
             "bitcoin" => Ok(Box::new(Bitcoin::new(self.name, self.address))),
             other => Err(format!("Unknown crypto kind: {}", other))

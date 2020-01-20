@@ -36,8 +36,8 @@ pub (crate) fn err_str<E: ::std::fmt::Display>(err: E) -> String {
 
 pub struct Puccinia {
     pub alpha_vantage: AlphaVantage,
-    pub bank: BTreeMap<String, Box<Bank>>,
-    pub crypto: BTreeMap<String, Box<Crypto>>,
+    pub bank: BTreeMap<String, Box<dyn Bank>>,
+    pub crypto: BTreeMap<String, Box<dyn Crypto>>,
     pub custom: BTreeMap<String, Custom>,
 }
 
