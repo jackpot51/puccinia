@@ -5,6 +5,7 @@ use std::str::FromStr;
 use ofx::{Ofx, string_to_date};
 
 pub use self::amex::Amex;
+pub use self::charles_schwab::CharlesSchwab;
 pub use self::fidelity::Fidelity;
 pub use self::fidelity_nb::FidelityNb;
 pub use self::tangerine::Tangerine;
@@ -13,6 +14,7 @@ pub use self::usaa_inv::UsaaInv;
 pub use self::vanguard::Vanguard;
 
 mod amex;
+mod charles_schwab;
 mod fidelity;
 mod fidelity_nb;
 mod tangerine;
@@ -33,6 +35,7 @@ impl BankConfig {
     pub fn build(self) -> Result<Box<dyn Bank>, String> {
         match self.kind.as_str() {
             "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
+            "charles_schwab" => Ok(Box::new(CharlesSchwab::new(self.name, self.username, self.password, self.accounts))),
             "fidelity" => Ok(Box::new(Fidelity::new(self.name, self.username, self.password, self.accounts))),
             "fidelity_nb" => Ok(Box::new(FidelityNb::new(self.name, self.username, self.password, self.accounts))),
             "tangerine" => Ok(Box::new(Tangerine::new(self.name, self.username, self.password, self.accounts))),
