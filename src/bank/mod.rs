@@ -1,8 +1,10 @@
 use chrono::{Date, Utc};
 use rust_decimal::Decimal;
+use std::{fs, path};
 use std::str::FromStr;
 
-use ofx::{Ofx, string_to_date};
+use err_str;
+use ofx::{Ofx, Response, string_to_date};
 
 pub use self::amex::Amex;
 pub use self::charles_schwab::CharlesSchwab;
@@ -93,7 +95,17 @@ pub trait Bank: Send + Sync {
 
     fn statement(&self, account: &BankAccount, start: Option<Date<Utc>>, end: Option<Date<Utc>>) -> Result<BankStatement, String> {
         if let Some(ofx) = self.as_ofx() {
-            let response = ofx.ofx(&account.id, &account.kind, start, end)?;
+            // Allow override for offline download
+            let ofx_file = format!("secret.{}.ofx", account.id);
+            let response = if path::Path::new(&ofx_file).exists() {
+                println!("Using OFX data from '{}'", ofx_file);
+                let response_data = fs::read(&ofx_file).map_err(|err| {
+                    format!("failed to read '{}': {}", ofx_file, err)
+                })?;
+                Response::decode(&response_data).map_err(err_str)?
+            } else {
+                ofx.ofx(&account.id, &account.kind, start, end)?
+            };
 
             let mut positions = Vec::new();
             if let Some(balance) = response.balance {
