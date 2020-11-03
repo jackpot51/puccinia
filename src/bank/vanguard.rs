@@ -55,7 +55,7 @@ impl Ofx for Vanguard {
     }
 
     fn fid(&self) -> &str {
-        "1358"
+        "15103"
     }
 
     fn fid_org(&self) -> &str {
