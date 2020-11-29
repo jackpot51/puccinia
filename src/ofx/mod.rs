@@ -109,28 +109,40 @@ pub trait Ofx {
             end: end
         };
 
-        let request_data = request.encode().map_err(err_str)?;
-        println!("Request: [\n{}\n]", str::from_utf8(&request_data).unwrap_or("[Invalid UTF-8]"));
+        let client = Client::builder()
+            .cookie_store(true)
+            .build().map_err(err_str)?;
 
-        let client = Client::new();
+        // Vanguard requires one request to get cookies, then the second request will succeed
+        let attempts = 2;
+        let mut attempt = 1;
+        loop {
+            println!("Attempt {}/{}", attempt, attempts);
 
-        let mut response = client
-            .post(request.url)
-            .header(ACCEPT, "application/ofx")
-            .header(CONNECTION, "close")
-            .header(CONTENT_TYPE, "application/x-ofx")
-            .header(USER_AGENT, "puccinia")
-            .body(Body::from(request_data))
-            .send().map_err(err_str)?;
+            let request_data = request.encode().map_err(err_str)?;
+            println!("Request: [\n{}\n]", str::from_utf8(&request_data).unwrap_or("[Invalid UTF-8]"));
 
-        let mut response_data = Vec::new();
-        response.read_to_end(&mut response_data).map_err(err_str)?;
-        println!("Response: [\n{}\n]", str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]"));
+            let mut response = client
+                .post(request.url)
+                .header(ACCEPT, "application/ofx")
+                .header(CONNECTION, "close")
+                .header(CONTENT_TYPE, "application/x-ofx")
+                .header(USER_AGENT, "puccinia")
+                .body(Body::from(request_data))
+                .send().map_err(err_str)?;
 
-        if response.status().is_success() {
-            Ok(Response::decode(&response_data).map_err(err_str)?)
-        } else {
-            Err(format!("error code {}\n{}", response.status(), str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")))
+            let mut response_data = Vec::new();
+            response.read_to_end(&mut response_data).map_err(err_str)?;
+            println!("Response: [\n{}\n]", str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]"));
+
+            if response.status().is_success() {
+                return Ok(Response::decode(&response_data).map_err(err_str)?);
+            } else if attempt > attempts {
+                return Err(format!("Error: {}\n{}", response.status(), str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")));
+            } else {
+                println!("Error: {}", response.status());
+                attempt += 1;
+            }
         }
     }
 }
