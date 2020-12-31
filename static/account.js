@@ -1,24 +1,21 @@
 function generate(response, wallet_id, account_id) {
-    var filter = checkbox_filter("position_id");
+    var checkbox_filter = create_checkbox_filter("position_id");
+    var filter = function(item) {
+        return item.wallet_id == wallet_id
+            && item.account_id == account_id
+            && checkbox_filter(item);
+    };
+    var time_filter = create_time_filter("chart_since", filter);
+
     var positions = response.positions.filter(function(position) {
-        return position.wallet_id == wallet_id
-            && position.account_id == account_id
-            && filter({ "position_id": position.id });
+        position.position_id = position.id;
+        return filter(position);
     });
-    var position_transactions = response.position_transactions.filter(function(transaction) {
-        return transaction.wallet_id == wallet_id
-            && transaction.account_id == account_id
-            && filter(transaction);
-    });
-    var prices = response.position_prices.filter(function(price) {
-        return price.wallet_id == wallet_id
-            && price.account_id == account_id
-            && filter(price);
-    });
+    var prices = response.position_prices.filter(time_filter);
+    var position_transactions = response.position_transactions.filter(time_filter);
     var transactions = response.transactions.filter(function(transaction) {
-        return transaction.wallet_id == wallet_id
-            && transaction.account_id == account_id
-            && filter({ "position_id": "balance" });
+        transaction.position_id = "balance";
+        return time_filter(transaction);
     });
 
     convert_transactions(transactions, position_transactions);

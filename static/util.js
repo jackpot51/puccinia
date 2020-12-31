@@ -2,11 +2,26 @@ function child(parent, tag) {
     return parent.appendChild(document.createElement(tag));
 }
 
-function checkbox_filter(key) {
+function create_checkbox_filter(key) {
     return function(item) {
         var element = document.getElementById('checkbox_' + key + '_' + item[key]);
         return element && element.checked;
     }
+}
+
+function create_time_filter(since_id, nested_filter = null) {
+    var since = document.getElementById(since_id).value;
+    return function(item) {
+        if (nested_filter && !nested_filter(item)) {
+            return false;
+        }
+
+        if (since && since >= item.time) {
+            return false;
+        }
+
+        return true;
+    };
 }
 
 function download(callback) {

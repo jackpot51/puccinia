@@ -1,34 +1,23 @@
 function generate(response, wallet_id, account_id, position_id) {
-    var wallet = response.wallets.find(function(wallet) {
-        return wallet.id == wallet_id;
-    });
-    var account = response.accounts.find(function(account) {
-        return account.wallet_id == wallet_id
-            && account.id == account_id;
-    });
+    var filter = function(item) {
+        return item.wallet_id == wallet_id
+            && item.account_id == account_id
+            && item.position_id == position_id;
+    };
+    var time_filter = create_time_filter("chart_since", filter);
+
     var position = response.positions.find(function(position) {
-        return position.wallet_id == wallet_id
-            && position.account_id == account_id
-            && position.id == position_id;
+        position.position_id = position.id;
+        return filter(position);
     });
-    var prices = response.position_prices.filter(function(price) {
-        return price.wallet_id == wallet_id
-            && price.account_id == account_id
-            && price.position_id == position_id;
-    });
-    var transactions = response.position_transactions.filter(function(transaction) {
-        return transaction.wallet_id == wallet_id
-            && transaction.account_id == account_id
-            && transaction.position_id == position_id;
+    var prices = response.position_prices.filter(time_filter);
+    var transactions = response.position_transactions.filter(time_filter);
+    var balance_transactions = response.transactions.filter(function(transaction) {
+        transaction.position_id = "balance";
+        return time_filter(transaction);
     });
 
-    if (position_id === "balance") {
-        var balance_transactions = response.transactions.filter(function(transaction) {
-            return transaction.wallet_id == wallet_id
-                && transaction.account_id == account_id;
-        });
-        convert_transactions(balance_transactions, transactions);
-    }
+    convert_transactions(balance_transactions, transactions);
 
     chart(document.getElementById("chart_price"), 'line', 'Price', share_price(prices));
     chart(document.getElementById("chart_value"), 'line', 'Value', share_value(position, transactions, prices));
