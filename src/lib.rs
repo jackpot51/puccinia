@@ -19,6 +19,7 @@ use std::collections::BTreeMap;
 use bank::{Bank, BankConfig};
 use crypto::{Crypto, CryptoConfig};
 use custom::{Custom, CustomConfig};
+use import::TransferConfig;
 
 pub mod bank;
 pub mod crypto;
@@ -37,6 +38,7 @@ pub struct Puccinia {
     pub bank: BTreeMap<String, Box<dyn Bank>>,
     pub crypto: BTreeMap<String, Box<dyn Crypto>>,
     pub custom: BTreeMap<String, Custom>,
+    pub transfer: Vec<TransferConfig>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -49,6 +51,8 @@ pub struct Config {
     pub crypto: BTreeMap<String, CryptoConfig>,
     #[serde(default)]
     pub custom: BTreeMap<String, CustomConfig>,
+    #[serde(default)]
+    pub transfer: Vec<TransferConfig>,
 }
 
 impl Config {
@@ -57,7 +61,8 @@ impl Config {
             alpha_vantage: AlphaVantage::new(&self.alpha_vantage),
             bank: BTreeMap::new(),
             crypto: BTreeMap::new(),
-            custom: BTreeMap::new()
+            custom: BTreeMap::new(),
+            transfer: self.transfer,
         };
 
         for (id, bank) in self.bank {

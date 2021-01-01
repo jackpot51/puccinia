@@ -8,6 +8,19 @@ use database::{establish_connection};
 use database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction};
 use database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions};
 
+#[derive(Deserialize, Serialize)]
+pub struct TransferConfig {
+    pub name: String,
+    pub from: String,
+    pub from_wallet: Option<String>,
+    pub from_account: Option<String>,
+    pub to: String,
+    pub to_wallet: Option<String>,
+    pub to_account: Option<String>,
+    #[serde(default)]
+    pub instant: bool,
+}
+
 pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
     let connection = establish_connection();
 
