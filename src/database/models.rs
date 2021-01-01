@@ -1,4 +1,12 @@
-use super::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions};
+use super::schema::{
+    wallets,
+    accounts,
+    positions,
+    position_prices,
+    position_transactions,
+    transactions,
+    transfers,
+};
 
 #[derive(Debug, Insertable, Queryable, Serialize)]
 #[table_name = "wallets"]
@@ -60,4 +68,15 @@ pub struct Transaction {
     pub name: String,
     pub time: String,
     pub amount: String,
+}
+
+#[derive(Debug, Insertable, Queryable, Serialize)]
+#[table_name = "transfers"]
+pub struct Transfer {
+    pub from_wallet_id: String,
+    pub from_account_id: String,
+    pub from_id: String,
+    pub to_wallet_id: String,
+    pub to_account_id: String,
+    pub to_id: String,
 }

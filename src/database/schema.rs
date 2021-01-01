@@ -54,12 +54,24 @@ table! {
 }
 
 table! {
+    transfers (from_wallet_id, from_account_id, from_id, to_wallet_id, to_account_id, to_id) {
+        from_wallet_id -> Text,
+        from_account_id -> Text,
+        from_id -> Text,
+        to_wallet_id -> Text,
+        to_account_id -> Text,
+        to_id -> Text,
+    }
+}
+
+table! {
     wallets (id) {
         id -> Text,
         name -> Text,
     }
 }
 
+//TODO: Add deeper joins
 joinable!(accounts -> wallets (wallet_id));
 joinable!(position_prices -> wallets (wallet_id));
 joinable!(position_transactions -> wallets (wallet_id));
