@@ -86,6 +86,7 @@ function chart(element, type, title, data, fullscreen = false) {
         };
     }
 
+    Chart.defaults.global.defaultFontColor = '#ffffff';
     element.chart = new Chart(element.getContext('2d'), {
         type: type,
         data: {
