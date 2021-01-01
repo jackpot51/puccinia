@@ -21,7 +21,7 @@ The following is a list of current and future Puccinia features:
     - [x] Bitcoin address data using blockchain.info
     - [x] Bitcoin price using Coinnect
     - [ ] More cryptocurrency support
-  - [ ] Retrieve stock and fund data
+  - [x] Retrieve stock and fund data
 - [x] Update data
   - [x] Periodic updates of positions
   - [x] Periodic updates of transactions
