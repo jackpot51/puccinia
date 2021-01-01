@@ -35,6 +35,9 @@
             cell = child(row, 'th');
             cell.innerText = 'y';
 
+            cell = child(row, 'th');
+            cell.innerText = 'label';
+
             var tbody = child(table, 'tbody');
 
             for (var i in data.data) {
@@ -47,6 +50,9 @@
 
                 cell = child(row, 'td');
                 cell.innerText = point.y;
+
+                cell = child(row, 'td');
+                cell.innerText = point.label;
             }
         }
         </script>
