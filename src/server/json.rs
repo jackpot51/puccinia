@@ -1,7 +1,7 @@
 use actix_web::{error, Error, web::Json, web::Data};
 use diesel::prelude::*;
-use puccinia::database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction};
-use puccinia::database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions};
+use puccinia::database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction, Transfer};
+use puccinia::database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions, transfers};
 use std::sync::Arc;
 use super::AppState;
 
@@ -13,6 +13,7 @@ pub struct JsonDump {
     position_prices: Vec<PositionPrice>,
     position_transactions: Vec<PositionTransaction>,
     transactions: Vec<Transaction>,
+    transfers: Vec<Transfer>,
 }
 
 pub fn json(state: Data<Arc<AppState>>) -> Result<Json<JsonDump>, Error> {
@@ -49,12 +50,18 @@ pub fn json(state: Data<Arc<AppState>>) -> Result<Json<JsonDump>, Error> {
         .load::<Transaction>(&*connection)
         .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
 
+    let transfers = transfers::table
+        .order((transfers::from_id.asc(), transfers::to_id.asc()))
+        .load::<Transfer>(&*connection)
+        .map_err(|err| error::ErrorInternalServerError(format!("{}", err)))?;
+
     Ok(Json(JsonDump {
         wallets,
         accounts,
         positions,
         position_prices,
         position_transactions,
-        transactions
+        transactions,
+        transfers,
     }))
 }
