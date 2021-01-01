@@ -91,7 +91,9 @@ function chart(element, type, title, data, fullscreen = false) {
         data: {
             datasets: [{
                 label: title,
-                data: data.slice()
+                data: data.slice(),
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderColor: "rgba(255, 255, 255, 0.1)",
             }]
         },
         options: {
