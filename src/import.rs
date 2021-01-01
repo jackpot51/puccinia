@@ -1,12 +1,14 @@
 use chrono::{Duration, Local, TimeZone, Utc};
 use diesel;
 use diesel::prelude::*;
+use rust_decimal::Decimal;
+use std::str::FromStr;
 use toml;
 
 use Config;
 use database::{establish_connection};
-use database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction};
-use database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions};
+use database::models::{Wallet, Account, Position, PositionPrice, PositionTransaction, Transaction, Transfer};
+use database::schema::{wallets, accounts, positions, position_prices, position_transactions, transactions, transfers};
 
 #[derive(Deserialize, Serialize)]
 pub struct TransferConfig {
@@ -38,6 +40,11 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
 
     // Deleted to ensure that only current positions are listed
     diesel::delete(positions::table)
+        .execute(&connection)
+        .unwrap();
+
+    // Deleted to ensure that only current transfers are listed
+    diesel::delete(transfers::table)
         .execute(&connection)
         .unwrap();
 
@@ -273,6 +280,132 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                 })
                 .execute(&connection)
                 .unwrap();
+        }
+
+        let transactions = transactions::table
+            .order((transactions::time.asc(), transactions::id.asc()))
+            .load::<Transaction>(&connection)
+            .unwrap();
+        for transfer in &puccinia.transfer {
+            println!("{} from '{}' to '{}'", transfer.name, transfer.from, transfer.to);
+
+            let mut froms = Vec::new();
+            for from in transactions.iter() {
+                if from.name != transfer.from {
+                    continue;
+                }
+
+                if let Some(wallet_id) = &transfer.from_wallet {
+                    if &from.wallet_id != wallet_id {
+                        continue;
+                    }
+                }
+
+                if let Some(account_id) = &transfer.from_account {
+                    if &from.account_id != account_id {
+                        continue;
+                    }
+                }
+
+                let from_amount = match Decimal::from_str(&from.amount) {
+                    Ok(ok) => ok,
+                    Err(err) => {
+                        println!("  Invalid amount for 'from' transaction: {}: {}", from.amount, err);
+                        continue;
+                    }
+                };
+
+                if from_amount.is_sign_positive() {
+                    println!("  Positive amount for 'from' transaction: {}", from.amount);
+                    continue;
+                }
+
+                froms.push((from, from_amount));
+            }
+
+            let mut tos = Vec::new();
+            for to in transactions.iter() {
+                if to.name != transfer.to {
+                    continue;
+                }
+
+                if let Some(wallet_id) = &transfer.to_wallet {
+                    if &to.wallet_id != wallet_id {
+                        continue;
+                    }
+                }
+
+                if let Some(account_id) = &transfer.to_account {
+                    if &to.account_id != account_id {
+                        continue;
+                    }
+                }
+
+                let to_amount = match Decimal::from_str(&to.amount) {
+                    Ok(ok) => ok,
+                    Err(err) => {
+                        println!("  Invalid amount for 'to' transaction: {}: {}", to.amount, err);
+                        continue;
+                    }
+                };
+
+                if to_amount.is_sign_negative() {
+                    println!("  Negative amount for 'to' transaction: {}", to.amount);
+                    continue;
+                }
+
+                tos.push((to, to_amount));
+            }
+
+            let mut from_i = 0;
+            while from_i < froms.len() {
+                let (from, from_amount) = froms[from_i];
+
+                let mut matched = false;
+                let mut to_i = 0;
+                while !matched && to_i < tos.len() {
+                    let (to, to_amount) = tos[to_i];
+
+                    if from_amount == -to_amount && (!transfer.instant || from.time == to.time) {
+                        matched = true;
+
+                        println!("  From: {}: {} > {}: {}", from.time, from.wallet_id, from.account_id, from.amount);
+                        println!("  To:   {}: {} > {}: {}", to.time, to.wallet_id, to.account_id, to.amount);
+
+                        diesel::insert_into(transfers::table)
+                            .values(&Transfer {
+                                from_wallet_id: from.wallet_id.to_string(),
+                                from_account_id: from.account_id.to_string(),
+                                from_id: from.id.to_string(),
+                                to_wallet_id: to.wallet_id.to_string(),
+                                to_account_id: to.account_id.to_string(),
+                                to_id: to.id.to_string(),
+                            })
+                            .execute(&connection)
+                            .unwrap();
+                    }
+
+                    if matched {
+                        tos.remove(to_i);
+                    } else {
+                        to_i += 1;
+                    }
+                }
+
+                if matched {
+                    froms.remove(from_i);
+                } else {
+                    from_i += 1;
+                }
+            }
+
+            for (from, _) in froms {
+                println!("  From not matched: {}: {} > {}: {}", from.time, from.wallet_id, from.account_id, from.amount);
+            }
+
+            for (to, _) in tos {
+                println!("  To not matched: {}: {} > {}: {}", to.time, to.wallet_id, to.account_id, to.amount);
+            }
         }
     }
 }
