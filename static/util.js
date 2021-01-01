@@ -370,6 +370,35 @@ function net_cash_flow(transactions, amount_key="amount") {
 
 function expenses(transactions, transfers) {
     var data = [];
+    for (var i = 0; i < transactions.length; i++) {
+        var transaction = transactions[i];
+
+        var transfer = transfers.find(function(transfer) {
+            return (
+                transaction.wallet_id == transfer.from_wallet_id &&
+                transaction.account_id == transfer.from_account_id &&
+                transaction.id == transfer.from_id
+            );
+        });
+        if (transfer === undefined) {
+            var date = new Date(transaction.time);
+            var amount = parseFloat(transaction.amount);
+            if (amount < 0) {
+                data.push({
+                    x: date,
+                    y: Math.round(amount * 100.0)/100.0,
+                    title: transaction.time,
+                    label: transaction.name
+                });
+            }
+        }
+    }
+
+    return data;
+}
+
+function net_expenses(transactions, transfers) {
+    var data = [];
     var total = 0.0;
     for (var i = 0; i < transactions.length; i++) {
         var transaction = transactions[i];
@@ -400,6 +429,35 @@ function expenses(transactions, transfers) {
 }
 
 function income(transactions, transfers) {
+    var data = [];
+    for (var i = 0; i < transactions.length; i++) {
+        var transaction = transactions[i];
+
+        var transfer = transfers.find(function(transfer) {
+            return (
+                transaction.wallet_id == transfer.to_wallet_id &&
+                transaction.account_id == transfer.to_account_id &&
+                transaction.id == transfer.to_id
+            );
+        });
+        if (transfer === undefined) {
+            var date = new Date(transaction.time);
+            var amount = parseFloat(transaction.amount);
+            if (amount > 0) {
+                data.push({
+                    x: date,
+                    y: Math.round(amount * 100.0)/100.0,
+                    title: transaction.time,
+                    label: transaction.name
+                });
+            }
+        }
+    }
+
+    return data;
+}
+
+function net_income(transactions, transfers) {
     var data = [];
     var total = 0.0;
     for (var i = 0; i < transactions.length; i++) {
