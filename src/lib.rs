@@ -1,5 +1,3 @@
-#![feature(extern_prelude)]
-
 extern crate alpha_vantage;
 extern crate chrono;
 extern crate coinnect;
