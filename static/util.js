@@ -9,14 +9,19 @@ function create_checkbox_filter(key) {
     }
 }
 
-function create_time_filter(since_id, nested_filter = null) {
+function create_time_filter(since_id, until_id, nested_filter = null) {
     var since = document.getElementById(since_id).value;
+    var until = document.getElementById(until_id).value;
     return function(item) {
         if (nested_filter && !nested_filter(item)) {
             return false;
         }
 
-        if (since && since >= item.time) {
+        if (since && since > item.time) {
+            return false;
+        }
+
+        if (until && until < item.time) {
             return false;
         }
 

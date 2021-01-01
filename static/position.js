@@ -4,7 +4,7 @@ function generate(response, wallet_id, account_id, position_id) {
             && item.account_id == account_id
             && item.position_id == position_id;
     };
-    var time_filter = create_time_filter("chart_since", filter);
+    var time_filter = create_time_filter("chart_since", "chart_until", filter);
 
     var position = response.positions.find(function(position) {
         position.position_id = position.id;

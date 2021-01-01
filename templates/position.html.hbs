@@ -42,7 +42,11 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Since</span>
                 </div>
-                <input id="chart_since" type="date" class="form-control" onchange="refresh('{{wallet.id}}', '{{account.id}}', '{{position.id}}')"/>
+                <input id="chart_since" type="date" value="2020-01-01" class="form-control" onchange="refresh('{{wallet.id}}', '{{account.id}}', '{{position.id}}')"/>
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Until</span>
+                </div>
+                <input id="chart_until" type="date" value="2021-12-31" class="form-control" onchange="refresh('{{wallet.id}}', '{{account.id}}', '{{position.id}}')"/>
             </div>
         </div>
 

@@ -1,6 +1,6 @@
 function generate(response) {
     var filter = create_checkbox_filter("wallet_id");
-    var time_filter = create_time_filter("chart_since", filter);
+    var time_filter = create_time_filter("chart_since", "chart_until", filter);
 
     var positions = response.positions.filter(filter);
     var prices = response.position_prices.filter(time_filter);

@@ -5,7 +5,7 @@ function generate(response, wallet_id, account_id) {
             && item.account_id == account_id
             && checkbox_filter(item);
     };
-    var time_filter = create_time_filter("chart_since", filter);
+    var time_filter = create_time_filter("chart_since", "chart_until", filter);
 
     var positions = response.positions.filter(function(position) {
         position.position_id = position.id;
