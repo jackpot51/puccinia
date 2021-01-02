@@ -61,6 +61,25 @@ function chart_divs(element, ids) {
         canvas.id = ids[i];
         canvas.setAttribute("width", 300);
         canvas.setAttribute("height", 300);
+
+        var button_group = child(card_body, "div");
+        button_group.classList.add("btn-group");
+
+        var button_chart = child(button_group, "button");
+        button_chart.classList.add("btn", "btn-secondary");
+        button_chart.innerHTML = "Chart";
+
+        var button_table = child(button_group, "button");
+        button_table.classList.add("btn", "btn-secondary");
+        button_table.innerHTML = "Table";
+
+        var button_reset = child(button_group, "button");
+        button_reset.classList.add("btn", "btn-secondary");
+        button_reset.innerHTML = "Reset";
+
+        canvas.button_chart = button_chart;
+        canvas.button_table = button_table;
+        canvas.button_reset = button_reset;
     }
 }
 
@@ -70,18 +89,8 @@ function chart(element, type, title, data, fullscreen = false) {
         delete element.chart;
     }
 
-    var maintainAspectRatio = true;
-    if (fullscreen) {
-        element.onclick = function() {
-            var table_window = window.open("/static/table.html");
-            table_window.table_data = {
-                "title": title,
-                "data": data
-            };
-        };
-        maintainAspectRatio = false;
-    } else {
-        element.onclick = function() {
+    if (element.button_chart) {
+        element.button_chart.onclick = function() {
             var chart_window = window.open("/static/chart.html");
             chart_window.chart_data = {
                 "type": type,
@@ -90,6 +99,31 @@ function chart(element, type, title, data, fullscreen = false) {
             };
         };
     }
+
+    if (element.button_table) {
+        element.button_table.onclick = function() {
+            var table_window = window.open("/static/table.html");
+            table_window.table_data = {
+                "title": title,
+                "data": data
+            };
+        };
+    }
+
+    if (element.button_reset) {
+        element.button_reset.onclick = function() {
+            console.log(element, element.chart);
+            if (element.chart) {
+                element.chart.resetZoom();
+            }
+        };
+    }
+
+    element.ondblclick = function() {
+        if (element.chart) {
+            element.chart.resetZoom();
+        }
+    };
 
     Chart.defaults.global.defaultFontColor = '#ffffff';
     element.chart = new Chart(element.getContext('2d'), {
@@ -104,7 +138,17 @@ function chart(element, type, title, data, fullscreen = false) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: maintainAspectRatio,
+            maintainAspectRatio: !fullscreen,
+            plugins: {
+                zoom: {
+                    pan: {
+                        enabled: true
+                    },
+                    zoom: {
+                        enabled: true
+                    }
+                }
+            },
             scales: {
                 xAxes: [{
                     type: 'time',
