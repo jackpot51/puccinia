@@ -1,57 +1,8 @@
-use bank::{Bank, BankAccount};
-use ofx::Ofx;
+use bank_ofx;
 
-pub struct Usaa {
-    name: String,
-    username: String,
-    password: String,
-    accounts: Option<Vec<BankAccount>>,
-}
-
-impl Usaa {
-    pub fn new(name: String, username: String, password: String, accounts: Option<Vec<BankAccount>>) -> Usaa {
-        Usaa {
-            name: name,
-            username: username,
-            password: password,
-            accounts: accounts,
-        }
-    }
-}
-
-impl Bank for Usaa {
-    fn kind(&self) -> &str {
-        "usaa"
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn as_ofx<'a>(&'a self) -> Option<&'a dyn Ofx> {
-        Some(self as &dyn Ofx)
-    }
-
-    fn accounts(&self) -> Result<Vec<BankAccount>, String> {
-        if let Some(ref accounts) = self.accounts {
-            Ok(accounts.clone())
-        } else {
-            self.ofx_accounts()
-        }
-    }
-}
-
-impl Ofx for Usaa {
+bank_ofx!("usaa", Usaa, {
     fn url(&self) -> &str {
         "https://service2.usaa.com/ofx/OFXServlet"
-    }
-
-    fn username(&self) -> &str {
-        &self.username
-    }
-
-    fn password(&self) -> &str {
-        &self.password
     }
 
     fn fid(&self) -> &str {
@@ -62,11 +13,7 @@ impl Ofx for Usaa {
         "USAA"
     }
 
-    fn bank_id(&self) -> &str {
-        "314074269"
-    }
-
     fn broker_id(&self) -> &str {
         "USAA.COM"
     }
-}
+});

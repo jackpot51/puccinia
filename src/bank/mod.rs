@@ -8,6 +8,7 @@ use ofx::{Ofx, Response, string_to_date};
 
 pub use self::amex::Amex;
 pub use self::charles_schwab::CharlesSchwab;
+pub use self::chase::Chase;
 pub use self::fidelity::Fidelity;
 pub use self::fidelity_nb::FidelityNb;
 pub use self::tangerine::Tangerine;
@@ -17,6 +18,7 @@ pub use self::vanguard::Vanguard;
 
 mod amex;
 mod charles_schwab;
+mod chase;
 mod fidelity;
 mod fidelity_nb;
 mod tangerine;
@@ -24,26 +26,125 @@ mod usaa;
 mod usaa_inv;
 mod vanguard;
 
+#[macro_export]
+macro_rules! bank_ofx {
+    ($kind:literal, $type:ident, {
+        $( $body:tt )*
+    }) => {
+        use $crate::bank::{Bank, BankAccount};
+        use $crate::ofx::Ofx;
+
+        pub struct $type {
+            name: String,
+            username: String,
+            password: String,
+            bank_id: String,
+            client_id: String,
+            accounts: Option<Vec<BankAccount>>,
+        }
+
+        impl $type {
+            pub fn new(
+                name: String,
+                username: String,
+                password: String,
+                bank_id: String,
+                client_id: String,
+                accounts: Option<Vec<BankAccount>>
+            ) -> Self {
+                Self {
+                    name,
+                    username,
+                    password,
+                    bank_id,
+                    client_id,
+                    accounts,
+                }
+            }
+        }
+
+        impl Bank for $type {
+            fn kind(&self) -> &str {
+                $kind
+            }
+
+            fn name(&self) -> &str {
+                &self.name
+            }
+
+            fn as_ofx<'a>(&'a self) -> Option<&'a dyn Ofx> {
+                Some(self as &dyn Ofx)
+            }
+
+            fn accounts(&self) -> Result<Vec<BankAccount>, String> {
+                if let Some(ref accounts) = self.accounts {
+                    Ok(accounts.clone())
+                } else {
+                    self.ofx_accounts()
+                }
+            }
+        }
+
+        impl Ofx for $type {
+            fn username(&self) -> &str {
+                &self.username
+            }
+
+            fn password(&self) -> &str {
+                &self.password
+            }
+
+            fn bank_id(&self) -> &str {
+                &self.bank_id
+            }
+
+            fn client_id(&self) -> &str {
+                &self.client_id
+            }
+
+            $( $body )*
+        }
+    };
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct BankConfig {
     pub kind: String,
     pub name: String,
     pub username: String,
     pub password: String,
+    #[serde(default)]
+    pub bank_id: String,
+    #[serde(default)]
+    pub client_id: String,
     pub accounts: Option<Vec<BankAccount>>,
 }
 
 impl BankConfig {
     pub fn build(self) -> Result<Box<dyn Bank>, String> {
+        macro_rules! bank_config {
+            ($type:ty) => {
+                Ok(Box::new(<$type>::new(
+                    self.name,
+                    self.username,
+                    self.password,
+                    self.bank_id,
+                    self.client_id,
+                    self.accounts
+                )))
+            };
+        }
+
         match self.kind.as_str() {
-            "amex" => Ok(Box::new(Amex::new(self.name, self.username, self.password, self.accounts))),
-            "charles_schwab" => Ok(Box::new(CharlesSchwab::new(self.name, self.username, self.password, self.accounts))),
-            "fidelity" => Ok(Box::new(Fidelity::new(self.name, self.username, self.password, self.accounts))),
-            "fidelity_nb" => Ok(Box::new(FidelityNb::new(self.name, self.username, self.password, self.accounts))),
-            "tangerine" => Ok(Box::new(Tangerine::new(self.name, self.username, self.password, self.accounts))),
-            "usaa" => Ok(Box::new(Usaa::new(self.name, self.username, self.password, self.accounts))),
-            "usaa_inv" => Ok(Box::new(UsaaInv::new(self.name, self.username, self.password, self.accounts))),
-            "vanguard" => Ok(Box::new(Vanguard::new(self.name, self.username, self.password, self.accounts))),
+            "amex" => bank_config!(Amex),
+            "charles_schwab" => bank_config!(CharlesSchwab),
+            "chase" => bank_config!(Chase),
+            "fidelity" => bank_config!(Fidelity),
+            "fidelity_nb" => bank_config!(FidelityNb),
+            "tangerine" => bank_config!(Tangerine),
+            "usaa" => bank_config!(Usaa),
+            "usaa_inv" => bank_config!(UsaaInv),
+            "vanguard" => bank_config!(Vanguard),
             other => Err(format!("Unknown bank kind: {}", other))
         }
     }

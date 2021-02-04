@@ -1,16 +1,20 @@
 use bank_ofx;
 
-bank_ofx!("amex", Amex, {
+bank_ofx!("chase", Chase, {
     fn url(&self) -> &str {
-        "https://online.americanexpress.com/myca/ofxdl/desktop/desktopDownload.do?request_type=nl_ofxdownload"
+        "https://ofx.chase.com"
+    }
+
+    fn ofx_ver(&self) -> &str {
+        "103"
     }
 
     fn fid(&self) -> &str {
-        "3101"
+        "10898"
     }
 
     fn fid_org(&self) -> &str {
-        "AMEX"
+        "B1"
     }
 
     fn app_id(&self) -> &str {
@@ -18,6 +22,6 @@ bank_ofx!("amex", Amex, {
     }
 
     fn app_ver(&self) -> &str {
-        "1500"
+        "2500"
     }
 });
