@@ -79,6 +79,7 @@ pub trait Ofx {
                         id,
                         kind,
                         name: None,
+                        amount: None,
                     });
                 }
             }

@@ -155,6 +155,7 @@ pub struct BankAccount {
     pub id: String,
     pub kind: String,
     pub name: Option<String>,
+    pub amount: Option<String>,
 }
 
 pub struct BankPositionTransaction {
@@ -196,6 +197,31 @@ pub trait Bank: Send + Sync {
     fn accounts(&self) -> Result<Vec<BankAccount>, String>;
 
     fn statement(&self, account: &BankAccount, start: Option<Date<Utc>>, end: Option<Date<Utc>>) -> Result<BankStatement, String> {
+        if let Some(amount) = &account.amount {
+            println!("Using manual amount '{}'", amount);
+            let value = Decimal::from_str(&amount).map_err(|err| {
+                format!("invalid decimal: {}: {}", amount, err)
+            })?;
+
+            let mut positions = Vec::new();
+            positions.push(BankPosition {
+                id: "balance".to_string(),
+                name: "Balance".to_string(),
+                units: value,
+                price: Decimal::new(1, 0),
+                value: value,
+                transactions: Vec::new()
+            });
+
+            let transactions = Vec::new();
+            //TODO: CSV import?
+
+            return Ok(BankStatement {
+                positions: positions,
+                transactions: transactions
+            });
+        }
+
         if let Some(ofx) = self.as_ofx() {
             // Allow override for offline download
             let ofx_file = format!("secret.{}.ofx", account.id);
