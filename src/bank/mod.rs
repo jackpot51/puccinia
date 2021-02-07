@@ -154,6 +154,7 @@ impl BankConfig {
 pub struct BankAccount {
     pub id: String,
     pub kind: String,
+    pub name: Option<String>,
 }
 
 pub struct BankPositionTransaction {

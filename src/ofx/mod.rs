@@ -76,8 +76,9 @@ pub trait Ofx {
             if let Some(id) = account.id {
                 if let Some(kind) = account.kind {
                     accounts.push(BankAccount {
-                        id: id,
-                        kind: kind
+                        id,
+                        kind,
+                        name: None,
                     });
                 }
             }

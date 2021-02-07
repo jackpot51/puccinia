@@ -66,7 +66,10 @@ pub fn import<S: AsRef<str>, I: Iterator<Item=S>>(config_tomls: I) {
                     .values(&Account {
                         wallet_id: id.to_string(),
                         id: account.id.clone(),
-                        name: format!("{}_{}", account.kind, account.id)
+                        name: match &account.name {
+                            Some(some) => some.clone(),
+                            None => format!("{}_{}", account.id, account.kind),
+                        },
                     })
                     .execute(&connection)
                     .unwrap();
