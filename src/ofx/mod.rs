@@ -40,6 +40,10 @@ pub trait Ofx {
         false
     }
 
+    fn user_agent(&self) -> &str {
+        "puccinia"
+    }
+
     fn username(&self) -> &str;
 
     fn password(&self) -> &str;
@@ -134,7 +138,7 @@ pub trait Ofx {
                 .header(ACCEPT, "application/ofx")
                 .header(CONNECTION, "close")
                 .header(CONTENT_TYPE, "application/x-ofx")
-                .header(USER_AGENT, "puccinia")
+                .header(USER_AGENT, self.user_agent())
                 .body(Body::from(request_data))
                 .send().map_err(err_str)?;
 

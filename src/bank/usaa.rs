@@ -13,6 +13,10 @@ bank_ofx!("usaa", Usaa, {
         true
     }
 
+    fn user_agent(&self) -> &str {
+        "InetClntApp/3.0"
+    }
+
     fn fid(&self) -> &str {
         "67811"
     }
