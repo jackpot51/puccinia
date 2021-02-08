@@ -135,7 +135,6 @@ pub trait Ofx {
 
             let mut response = client
                 .post(request.url)
-                .header(ACCEPT, "application/ofx")
                 .header(CONNECTION, "close")
                 .header(CONTENT_TYPE, "application/x-ofx")
                 .header(USER_AGENT, self.user_agent())
