@@ -36,6 +36,10 @@ pub trait Ofx {
         "102"
     }
 
+    fn pretty(&self) -> bool {
+        false
+    }
+
     fn username(&self) -> &str;
 
     fn password(&self) -> &str;
@@ -92,6 +96,7 @@ pub trait Ofx {
         let request = Request {
             url: self.url(),
             ofx_ver: self.ofx_ver(),
+            pretty: self.pretty(),
 
             username: self.username(),
             password: self.password(),

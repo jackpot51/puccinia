@@ -22,6 +22,7 @@ pub fn random_string(len: usize) -> String {
 pub struct Request<'a> {
     pub url: &'a str,
     pub ofx_ver: &'a str,
+    pub pretty: bool,
 
     pub username: &'a str,
     pub password: &'a str,
@@ -52,51 +53,69 @@ impl<'a> Request<'a> {
         write!(w, "OLDFILEUID:NONE\r\n")?;
         write!(w, "NEWFILEUID:{}\r\n", random_string(32))?;
         write!(w, "\r\n")?;
+        if ! self.pretty {
+            // When using pretty formatting, first tag will output endline
+            write!(w, "\r\n")?;
+        }
 
         Ok(())
     }
 
+    fn start_element<W: Write>(&self, w: &mut EventWriter<W>, element: &str) -> Result<()> {
+        if self.pretty {
+            write!(w.inner_mut(), "\r\n")?;
+        }
+        w.write(XmlEvent::start_element(element))
+    }
+
+    fn end_element<W: Write>(&self, w: &mut EventWriter<W>, element: &str) -> Result<()> {
+        if self.pretty {
+            write!(w.inner_mut(), "\r\n")?;
+        }
+        w.write(XmlEvent::end_element().name(element))
+    }
+
     fn write_signon<W: Write>(&self, w: &mut EventWriter<W>) -> Result<()> {
-        w.write(XmlEvent::start_element("SIGNONMSGSRQV1"))?;
+        self.start_element(w, "SIGNONMSGSRQV1")?;
         {
-            w.write(XmlEvent::start_element("SONRQ"))?;
+            self.start_element(w, "SONRQ")?;
             {
-                w.write(XmlEvent::start_element("DTCLIENT"))?;
+                self.start_element(w, "DTCLIENT")?;
                 w.write(XmlEvent::characters(&date_to_string(&Utc::today())))?;
 
-                w.write(XmlEvent::start_element("USERID"))?;
+                self.start_element(w, "USERID")?;
                 w.write(XmlEvent::characters(self.username))?;
 
-                w.write(XmlEvent::start_element("USERPASS"))?;
+                self.start_element(w, "USERPASS")?;
                 w.write(XmlEvent::characters(self.password))?;
 
-                w.write(XmlEvent::start_element("LANGUAGE"))?;
+                self.start_element(w, "LANGUAGE")?;
                 w.write(XmlEvent::characters(self.language))?;
 
-                w.write(XmlEvent::start_element("FI"))?;
+                self.start_element(w, "FI")?;
                 {
-                    w.write(XmlEvent::start_element("ORG"))?;
+                    self.start_element(w, "ORG")?;
                     w.write(XmlEvent::characters(self.fid_org))?;
 
-                    w.write(XmlEvent::start_element("FID"))?;
+                    self.start_element(w, "FID")?;
                     w.write(XmlEvent::characters(self.fid))?;
                 }
-                w.write(XmlEvent::end_element().name("FI"))?;
+                self.end_element(w, "FI")?;
 
-                w.write(XmlEvent::start_element("APPID"))?;
+                self.start_element(w, "APPID")?;
                 w.write(XmlEvent::characters(self.app_id))?;
 
-                w.write(XmlEvent::start_element("APPVER"))?;
+                self.start_element(w, "APPVER")?;
                 w.write(XmlEvent::characters(self.app_ver))?;
 
                 if ! self.client_id.is_empty() {
-                    w.write(XmlEvent::start_element("CLIENTUID"))?;
+                    self.start_element(w, "CLIENTUID")?;
                     w.write(XmlEvent::characters(self.client_id))?;
                 }
             }
-            w.write(XmlEvent::end_element().name("SONRQ"))?;
+            self.end_element(w, "SONRQ")?;
         }
-        w.write(XmlEvent::end_element().name("SIGNONMSGSRQV1"))?;
+        self.end_element(w, "SIGNONMSGSRQV1")?;
 
         Ok(())
     }
@@ -109,7 +128,7 @@ impl<'a> Request<'a> {
         })?;
 
         {
-            let mut w = EmitterConfig::new()
+            let mut writer = EmitterConfig::new()
                 .perform_indent(false)
                 .write_document_declaration(false)
                 .normalize_empty_elements(false)
@@ -117,204 +136,203 @@ impl<'a> Request<'a> {
                 .keep_element_names_stack(false)
                 .autopad_comments(false)
                 .create_writer(&mut data);
+            let w = &mut writer;
 
             match self.account_type {
                 "" => {
-                    w.write(XmlEvent::start_element("OFX"))?;
+                    self.start_element(w, "OFX")?;
                     {
-                        self.write_signon(&mut w)?;
+                        self.write_signon(w)?;
 
-                        w.write(XmlEvent::start_element("SIGNUPMSGSRQV1"))?;
+                        self.start_element(w, "SIGNUPMSGSRQV1")?;
                         {
-                            w.write(XmlEvent::start_element("ACCTINFOTRNRQ"))?;
+                            self.start_element(w, "ACCTINFOTRNRQ")?;
                             {
-                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                self.start_element(w, "TRNUID")?;
                                 w.write(XmlEvent::characters(&random_string(32)))?;
 
-                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
-                                w.write(XmlEvent::characters(&random_string(5)))?;
-
-                                w.write(XmlEvent::start_element("ACCTINFORQ"))?;
+                                self.start_element(w, "ACCTINFORQ")?;
                                 {
-                                    w.write(XmlEvent::start_element("DTACCTUP"))?;
-                                    w.write(XmlEvent::characters("19700101"))?;
+                                    self.start_element(w, "DTACCTUP")?;
+                                    //TODO: make configurable
+                                    w.write(XmlEvent::characters("19900101"))?;
                                 }
-                                w.write(XmlEvent::end_element().name("ACCTINFORQ"))?;
+                                self.end_element(w, "ACCTINFORQ")?;
                             }
-                            w.write(XmlEvent::end_element().name("ACCTINFOTRNRQ"))?;
+                            self.end_element(w, "ACCTINFOTRNRQ")?;
                         }
-                        w.write(XmlEvent::end_element().name("SIGNUPMSGSRQV1"))?;
+                        self.end_element(w, "SIGNUPMSGSRQV1")?;
                     }
-                    w.write(XmlEvent::end_element().name("OFX"))?;
+                    self.end_element(w, "OFX")?;
                 },
                 "INVESTMENT" => {
-                    w.write(XmlEvent::start_element("OFX"))?;
+                    self.start_element(w, "OFX")?;
                     {
-                        self.write_signon(&mut w)?;
+                        self.write_signon(w)?;
 
-                        w.write(XmlEvent::start_element("INVSTMTMSGSRQV1"))?;
+                        self.start_element(w, "INVSTMTMSGSRQV1")?;
                         {
-                            w.write(XmlEvent::start_element("INVSTMTTRNRQ"))?;
+                            self.start_element(w, "INVSTMTTRNRQ")?;
                             {
-                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                self.start_element(w, "TRNUID")?;
                                 w.write(XmlEvent::characters(&random_string(32)))?;
 
-                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
+                                self.start_element(w, "CLTCOOKIE")?;
                                 w.write(XmlEvent::characters(&random_string(5)))?;
 
-                                w.write(XmlEvent::start_element("INVSTMTRQ"))?;
+                                self.start_element(w, "INVSTMTRQ")?;
                                 {
-                                    w.write(XmlEvent::start_element("INVACCTFROM"))?;
+                                    self.start_element(w, "INVACCTFROM")?;
                                     {
-                                        w.write(XmlEvent::start_element("BROKERID"))?;
+                                        self.start_element(w, "BROKERID")?;
                                         w.write(XmlEvent::characters(self.broker_id))?;
 
-                                        w.write(XmlEvent::start_element("ACCTID"))?;
+                                        self.start_element(w, "ACCTID")?;
                                         w.write(XmlEvent::characters(self.account_id))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("INVACCTFROM"))?;
+                                    self.end_element(w, "INVACCTFROM")?;
 
-                                    w.write(XmlEvent::start_element("INCTRAN"))?;
+                                    self.start_element(w, "INCTRAN")?;
                                     {
                                         if let Some(ref start) = self.start {
-                                            w.write(XmlEvent::start_element("DTSTART"))?;
+                                            self.start_element(w, "DTSTART")?;
                                             w.write(XmlEvent::characters(&date_to_string(start)))?;
                                         }
 
                                         if let Some(ref end) = self.end {
-                                            w.write(XmlEvent::start_element("DTEND"))?;
+                                            self.start_element(w, "DTEND")?;
                                             w.write(XmlEvent::characters(&date_to_string(end)))?;
                                         }
 
-                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        self.start_element(w, "INCLUDE")?;
                                         w.write(XmlEvent::characters("Y"))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("INCTRAN"))?;
+                                    self.end_element(w, "INCTRAN")?;
 
-                                    w.write(XmlEvent::start_element("INCOO"))?;
+                                    self.start_element(w, "INCOO")?;
                                     w.write(XmlEvent::characters("Y"))?;
 
-                                    w.write(XmlEvent::start_element("INCPOS"))?;
+                                    self.start_element(w, "INCPOS")?;
                                     {
-                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        self.start_element(w, "INCLUDE")?;
                                         w.write(XmlEvent::characters("Y"))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("INCPOS"))?;
+                                    self.end_element(w, "INCPOS")?;
 
-                                    w.write(XmlEvent::start_element("INCBAL"))?;
+                                    self.start_element(w, "INCBAL")?;
                                     w.write(XmlEvent::characters("Y"))?;
                                 }
-                                w.write(XmlEvent::end_element().name("INVSTMTRQ"))?;
+                                self.end_element(w, "INVSTMTRQ")?;
                             }
-                            w.write(XmlEvent::end_element().name("INVSTMTTRNRQ"))?;
+                            self.end_element(w, "INVSTMTTRNRQ")?;
                         }
-                        w.write(XmlEvent::end_element().name("INVSTMTMSGSRQV1"))?;
+                        self.end_element(w, "INVSTMTMSGSRQV1")?;
                     }
-                    w.write(XmlEvent::end_element().name("OFX"))?;
+                    self.end_element(w, "OFX")?;
                 },
                 "CREDITCARD" => {
-                    w.write(XmlEvent::start_element("OFX"))?;
+                    self.start_element(w, "OFX")?;
                     {
-                        self.write_signon(&mut w)?;
+                        self.write_signon(w)?;
 
-                        w.write(XmlEvent::start_element("CREDITCARDMSGSRQV1"))?;
+                        self.start_element(w, "CREDITCARDMSGSRQV1")?;
                         {
-                            w.write(XmlEvent::start_element("CCSTMTTRNRQ"))?;
+                            self.start_element(w, "CCSTMTTRNRQ")?;
                             {
-                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                self.start_element(w, "TRNUID")?;
                                 w.write(XmlEvent::characters(&random_string(32)))?;
 
-                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
+                                self.start_element(w, "CLTCOOKIE")?;
                                 w.write(XmlEvent::characters(&random_string(5)))?;
 
-                                w.write(XmlEvent::start_element("CCSTMTRQ"))?;
+                                self.start_element(w, "CCSTMTRQ")?;
                                 {
-                                    w.write(XmlEvent::start_element("CCACCTFROM"))?;
+                                    self.start_element(w, "CCACCTFROM")?;
                                     {
-                                        w.write(XmlEvent::start_element("ACCTID"))?;
+                                        self.start_element(w, "ACCTID")?;
                                         w.write(XmlEvent::characters(self.account_id))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("CCACCTFROM"))?;
+                                    self.end_element(w, "CCACCTFROM")?;
 
-                                    w.write(XmlEvent::start_element("INCTRAN"))?;
+                                    self.start_element(w, "INCTRAN")?;
                                     {
                                         if let Some(ref start) = self.start {
-                                            w.write(XmlEvent::start_element("DTSTART"))?;
+                                            self.start_element(w, "DTSTART")?;
                                             w.write(XmlEvent::characters(&date_to_string(start)))?;
                                         }
 
                                         if let Some(ref end) = self.end {
-                                            w.write(XmlEvent::start_element("DTEND"))?;
+                                            self.start_element(w, "DTEND")?;
                                             w.write(XmlEvent::characters(&date_to_string(end)))?;
                                         }
 
-                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        self.start_element(w, "INCLUDE")?;
                                         w.write(XmlEvent::characters("Y"))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("INCTRAN"))?;
+                                    self.end_element(w, "INCTRAN")?;
                                 }
-                                w.write(XmlEvent::end_element().name("CCSTMTRQ"))?;
+                                self.end_element(w, "CCSTMTRQ")?;
                             }
-                            w.write(XmlEvent::end_element().name("CCSTMTTRNRQ"))?;
+                            self.end_element(w, "CCSTMTTRNRQ")?;
                         }
-                        w.write(XmlEvent::end_element().name("CREDITCARDMSGSRQV1"))?;
+                        self.end_element(w, "CREDITCARDMSGSRQV1")?;
                     }
-                    w.write(XmlEvent::end_element().name("OFX"))?;
+                    self.end_element(w, "OFX")?;
                 },
                 _ => {
-                    w.write(XmlEvent::start_element("OFX"))?;
+                    self.start_element(w, "OFX")?;
                     {
-                        self.write_signon(&mut w)?;
+                        self.write_signon(w)?;
 
-                        w.write(XmlEvent::start_element("BANKMSGSRQV1"))?;
+                        self.start_element(w, "BANKMSGSRQV1")?;
                         {
-                            w.write(XmlEvent::start_element("STMTTRNRQ"))?;
+                            self.start_element(w, "STMTTRNRQ")?;
                             {
-                                w.write(XmlEvent::start_element("TRNUID"))?;
+                                self.start_element(w, "TRNUID")?;
                                 w.write(XmlEvent::characters(&random_string(32)))?;
 
-                                w.write(XmlEvent::start_element("CLTCOOKIE"))?;
+                                self.start_element(w, "CLTCOOKIE")?;
                                 w.write(XmlEvent::characters(&random_string(5)))?;
 
-                                w.write(XmlEvent::start_element("STMTRQ"))?;
+                                self.start_element(w, "STMTRQ")?;
                                 {
-                                    w.write(XmlEvent::start_element("BANKACCTFROM"))?;
+                                    self.start_element(w, "BANKACCTFROM")?;
                                     {
-                                        w.write(XmlEvent::start_element("BANKID"))?;
+                                        self.start_element(w, "BANKID")?;
                                         w.write(XmlEvent::characters(self.bank_id))?;
 
-                                        w.write(XmlEvent::start_element("ACCTID"))?;
+                                        self.start_element(w, "ACCTID")?;
                                         w.write(XmlEvent::characters(self.account_id))?;
 
-                                        w.write(XmlEvent::start_element("ACCTTYPE"))?;
+                                        self.start_element(w, "ACCTTYPE")?;
                                         w.write(XmlEvent::characters(self.account_type))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("BANKACCTFROM"))?;
+                                    self.end_element(w, "BANKACCTFROM")?;
 
-                                    w.write(XmlEvent::start_element("INCTRAN"))?;
+                                    self.start_element(w, "INCTRAN")?;
                                     {
                                         if let Some(ref start) = self.start {
-                                            w.write(XmlEvent::start_element("DTSTART"))?;
+                                            self.start_element(w, "DTSTART")?;
                                             w.write(XmlEvent::characters(&date_to_string(start)))?;
                                         }
 
                                         if let Some(ref end) = self.end {
-                                            w.write(XmlEvent::start_element("DTEND"))?;
+                                            self.start_element(w, "DTEND")?;
                                             w.write(XmlEvent::characters(&date_to_string(end)))?;
                                         }
 
-                                        w.write(XmlEvent::start_element("INCLUDE"))?;
+                                        self.start_element(w, "INCLUDE")?;
                                         w.write(XmlEvent::characters("Y"))?;
                                     }
-                                    w.write(XmlEvent::end_element().name("INCTRAN"))?;
+                                    self.end_element(w, "INCTRAN")?;
                                 }
-                                w.write(XmlEvent::end_element().name("STMTRQ"))?;
+                                self.end_element(w, "STMTRQ")?;
                             }
-                            w.write(XmlEvent::end_element().name("STMTTRNRQ"))?;
+                            self.end_element(w, "STMTTRNRQ")?;
                         }
-                        w.write(XmlEvent::end_element().name("BANKMSGSRQV1"))?;
+                        self.end_element(w, "BANKMSGSRQV1")?;
                     }
-                    w.write(XmlEvent::end_element().name("OFX"))?;
+                    self.end_element(w, "OFX")?;
                 }
             }
         }
