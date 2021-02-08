@@ -148,7 +148,7 @@ pub trait Ofx {
 
             if response.status().is_success() {
                 return Ok(Response::decode(&response_data).map_err(err_str)?);
-            } else if attempt > attempts {
+            } else if attempt >= attempts {
                 return Err(format!("Error: {}\n{}", response.status(), str::from_utf8(&response_data).unwrap_or("[Invalid UTF-8]")));
             } else {
                 println!("Error: {}", response.status());
