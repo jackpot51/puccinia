@@ -20,6 +20,7 @@ pub struct Account {
     pub kind: Option<String>,
     pub bank_id: Option<String>,
     pub broker_id: Option<String>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Default)]
@@ -184,6 +185,13 @@ impl Response {
                                     response.currency = stack_data.remove("CURDEF");
                                 },
 
+                                "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO" => {
+                                    println!("Account Info");
+                                    if let Some(account) = response.accounts.last_mut() {
+                                        account.description = stack_data.remove("DESC");
+                                    }
+                                },
+
                                 "OFX/SIGNUPMSGSRSV1/ACCTINFOTRNRS/ACCTINFORS/ACCTINFO/BANKACCTINFO/BANKACCTFROM" |
                                 "OFX/BANKMSGSRSV1/STMTTRNRS/STMTRS/BANKACCTFROM" => {
                                     println!("Bank Account");
@@ -191,7 +199,8 @@ impl Response {
                                         id: stack_data.remove("ACCTID"),
                                         kind: stack_data.remove("ACCTTYPE"),
                                         bank_id: stack_data.remove("BANKID"),
-                                        broker_id: stack_data.remove("BROKERID")
+                                        broker_id: stack_data.remove("BROKERID"),
+                                        description: None,
                                     });
                                 },
 
@@ -202,7 +211,8 @@ impl Response {
                                         id: stack_data.remove("ACCTID"),
                                         kind: Some("CREDITCARD".to_string()),
                                         bank_id: None,
-                                        broker_id: None
+                                        broker_id: None,
+                                        description: None,
                                     });
                                 },
 
@@ -213,7 +223,8 @@ impl Response {
                                         id: stack_data.remove("ACCTID"),
                                         kind: Some("INVESTMENT".to_string()),
                                         bank_id: None,
-                                        broker_id: stack_data.remove("BROKERID")
+                                        broker_id: stack_data.remove("BROKERID"),
+                                        description: None,
                                     });
                                 },
 

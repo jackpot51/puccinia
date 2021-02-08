@@ -86,7 +86,7 @@ pub trait Ofx {
                     accounts.push(BankAccount {
                         id,
                         kind,
-                        name: None,
+                        name: account.description,
                         amount: None,
                     });
                 }
