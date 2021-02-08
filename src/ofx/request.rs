@@ -52,7 +52,6 @@ impl<'a> Request<'a> {
         write!(w, "COMPRESSION:NONE\r\n")?;
         write!(w, "OLDFILEUID:NONE\r\n")?;
         write!(w, "NEWFILEUID:{}\r\n", random_string(32))?;
-        write!(w, "\r\n")?;
         if ! self.pretty {
             // When using pretty formatting, first tag will output endline
             write!(w, "\r\n")?;
