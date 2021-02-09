@@ -34,6 +34,10 @@ features = ["sqlite"]
 version = "0.10.26"
 features = ["v111"]
 
+[dependencies.uuid]
+version = "0.8"
+features = ["v4"]
+
 [dependencies.xml-rs]
 version = "0.7"
 path = "xml-rs"

@@ -1,6 +1,6 @@
 use chrono::{Date, TimeZone, Utc};
 use reqwest::{Body, Client};
-use reqwest::header::{ACCEPT, CONNECTION, CONTENT_TYPE, USER_AGENT};
+use reqwest::header::{CONNECTION, CONTENT_TYPE, USER_AGENT};
 use std::str;
 use std::io::Read;
 

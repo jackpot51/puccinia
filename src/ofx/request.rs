@@ -19,6 +19,11 @@ pub fn random_string(len: usize) -> String {
     string
 }
 
+pub fn random_uuid() -> String {
+    let uuid = uuid::Uuid::new_v4();
+    uuid.to_string().to_ascii_uppercase()
+}
+
 pub struct Request<'a> {
     pub url: &'a str,
     pub ofx_ver: &'a str,
@@ -51,7 +56,7 @@ impl<'a> Request<'a> {
         write!(w, "CHARSET:1252\r\n")?;
         write!(w, "COMPRESSION:NONE\r\n")?;
         write!(w, "OLDFILEUID:NONE\r\n")?;
-        write!(w, "NEWFILEUID:{}\r\n", random_string(32))?;
+        write!(w, "NEWFILEUID:{}\r\n", random_uuid())?;
         if ! self.pretty {
             // When using pretty formatting, first tag will output endline
             write!(w, "\r\n")?;
@@ -148,7 +153,7 @@ impl<'a> Request<'a> {
                             self.start_element(w, "ACCTINFOTRNRQ")?;
                             {
                                 self.start_element(w, "TRNUID")?;
-                                w.write(XmlEvent::characters(&random_string(32)))?;
+                                w.write(XmlEvent::characters(&random_uuid()))?;
 
                                 self.start_element(w, "ACCTINFORQ")?;
                                 {
@@ -174,7 +179,7 @@ impl<'a> Request<'a> {
                             self.start_element(w, "INVSTMTTRNRQ")?;
                             {
                                 self.start_element(w, "TRNUID")?;
-                                w.write(XmlEvent::characters(&random_string(32)))?;
+                                w.write(XmlEvent::characters(&random_uuid()))?;
 
                                 self.start_element(w, "CLTCOOKIE")?;
                                 w.write(XmlEvent::characters(&random_string(5)))?;
@@ -239,7 +244,7 @@ impl<'a> Request<'a> {
                             self.start_element(w, "CCSTMTTRNRQ")?;
                             {
                                 self.start_element(w, "TRNUID")?;
-                                w.write(XmlEvent::characters(&random_string(32)))?;
+                                w.write(XmlEvent::characters(&random_uuid()))?;
 
                                 self.start_element(w, "CLTCOOKIE")?;
                                 w.write(XmlEvent::characters(&random_string(5)))?;
@@ -288,7 +293,7 @@ impl<'a> Request<'a> {
                             self.start_element(w, "STMTTRNRQ")?;
                             {
                                 self.start_element(w, "TRNUID")?;
-                                w.write(XmlEvent::characters(&random_string(32)))?;
+                                w.write(XmlEvent::characters(&random_uuid()))?;
 
                                 self.start_element(w, "CLTCOOKIE")?;
                                 w.write(XmlEvent::characters(&random_string(5)))?;

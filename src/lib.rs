@@ -11,6 +11,7 @@ extern crate rust_decimal;
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;
+extern crate uuid;
 extern crate xml;
 
 use alpha_vantage::AlphaVantage;
