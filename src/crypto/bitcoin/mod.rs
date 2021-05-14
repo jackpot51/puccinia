@@ -1,7 +1,3 @@
-use coinnect::coinnect::Coinnect;
-use coinnect::gdax::GdaxCreds;
-use coinnect::exchange::Exchange::Gdax;
-use coinnect::types::Pair::BTC_USD;
 use rust_decimal::Decimal;
 use std::str::FromStr;
 
@@ -51,20 +47,13 @@ impl Crypto for Bitcoin {
     }
 
     fn rate(&self) -> Result<Decimal, String> {
-        let creds = GdaxCreds::new("", "", "", "");
+        let api = BlockchainInfoApi;
+        let response = api.daily_price()?;
 
-        let mut api = Coinnect::new(Gdax, creds).map_err(|err| {
-            format!("{}", err)
+        let decimal = Decimal::from_str(&response).map_err(|err| {
+            format!("invalid decimal: {}: {}", response, err)
         })?;
 
-        let ticker = api.ticker(BTC_USD).map_err(|err| {
-            format!("{}", err)
-        })?;
-
-        let string = format!("{}", ticker.last_trade_price);
-        let rate = Decimal::from_str(&string).map_err(|err| {
-            format!("invalid decimal: {}: {}", string, err)
-        })?.normalize();
-        Ok(rate)
+        Ok(decimal.normalize())
     }
 }

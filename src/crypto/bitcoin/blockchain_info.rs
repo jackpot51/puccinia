@@ -17,4 +17,8 @@ impl BlockchainInfoApi {
     pub fn address_balance(&self, address: &str) -> Result<String, String> {
         self.api(&format!("addressbalance/{}", address))
     }
+
+    pub fn daily_price(&self) -> Result<String, String> {
+        self.api("24hrprice")
+    }
 }

@@ -1,6 +1,5 @@
 extern crate alpha_vantage;
 extern crate chrono;
-extern crate coinnect;
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
