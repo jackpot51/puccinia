@@ -88,6 +88,7 @@ pub trait Ofx {
                         kind,
                         name: account.description,
                         amount: None,
+                        file: None,
                     });
                 }
             }

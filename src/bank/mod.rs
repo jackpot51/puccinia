@@ -156,6 +156,7 @@ pub struct BankAccount {
     pub kind: String,
     pub name: Option<String>,
     pub amount: Option<String>,
+    pub file: Option<String>,
 }
 
 pub struct BankPositionTransaction {
@@ -224,7 +225,12 @@ pub trait Bank: Send + Sync {
 
         if let Some(ofx) = self.as_ofx() {
             // Allow override for offline download
-            let ofx_file = format!("secret.{}.ofx", account.id);
+            let ofx_file = if let Some(file) = &account.file {
+                file.to_string()
+            } else {
+                // Default file override is secret.ACCOUNT_ID.ofx
+                format!("secret.{}.ofx", account.id)
+            };
             let response = if path::Path::new(&ofx_file).exists() {
                 println!("Using OFX data from '{}'", ofx_file);
                 let response_data = fs::read(&ofx_file).map_err(|err| {

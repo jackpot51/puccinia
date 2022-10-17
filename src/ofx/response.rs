@@ -3,10 +3,20 @@ use std::str;
 use xml::reader::{ParserConfig, XmlEvent, Result};
 
 fn header_length(data: &[u8]) -> Option<usize> {
+    // Search for double newline indicating header is terminated
     for search in &["\r\n\r\n", "\n\n"] {
         for len in search.len()..data.len() {
             if &data[len - search.len() .. len] == search.as_bytes() {
                 return Some(len);
+            }
+        }
+    }
+
+    // Alternatively, look for <OFX> tag
+    for search in &["<OFX>"] {
+        for len in search.len()..data.len() {
+            if &data[len - search.len() .. len] == search.as_bytes() {
+                return Some(len - search.len());
             }
         }
     }
