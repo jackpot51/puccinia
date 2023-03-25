@@ -30,7 +30,7 @@ version = "1.4.3"
 features = ["sqlite"]
 
 [dependencies.openssl]
-version = "0.10.26"
+version = "0.10.48"
 features = ["v111"]
 
 [dependencies.uuid]
