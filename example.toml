@@ -11,12 +11,6 @@ alpha_vantage = "demo"
 # username = "username"
 # password = "password"
 
-# This is the Redox OS donation address
-[crypto.example]
-kind = "bitcoin"
-name = "Redox OS Bitcoin Donation"
-address = "1MD8PqWMUhNPBR6YhYUUgrztEJ6StkxGQK"
-
 # Custom entries can have any amount
 [custom.example]
 name = "Custom Example"
